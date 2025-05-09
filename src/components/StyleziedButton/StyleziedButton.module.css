@@ -1,0 +1,27 @@
+.styleziedButton {
+  border: none;
+  background-color: rgb(239, 239, 239);
+  color: #000;
+  padding: 7px 16px;
+  font-size: 14px;
+  line-height: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  max-height: fit-content;
+}
+.styleziedButton:hover {
+  background-color: rgb(219, 219, 219);
+}
+/* .styleziedButton + .styleziedButton {
+} */
+.styleziedButton___primary {
+  color: #fff;
+  background-color: rgb(var(--ig-primary-button));
+}
+.styleziedButton___primary:hover {
+  background-color: rgb(var(--ig-primary-button-hover));
+}
+.styleziedButton___primary:disabled {
+  background-color: rgb(var(--ig-primary-button-hover));
+}

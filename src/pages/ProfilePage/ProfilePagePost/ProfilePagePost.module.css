@@ -1,0 +1,50 @@
+.profile_page__post {
+  position: relative;
+}
+.profile_page__post img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  overflow: hidden;
+  aspect-ratio: 1;
+}
+.profile_page__post:hover .profile_page__post_hover {
+  opacity: 1;
+}
+.profile_page__post_hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  cursor: pointer;
+}
+.profile_page__post_hover__container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  font-size: 1.25rem;
+}
+.profile_page__post_hover__item {
+  display: flex;
+  align-items: center;
+}
+.profile_page__post_hover__item + .profile_page__post_hover__item {
+  margin-left: 30px;
+}
+.profile_page__post_hover__icon {
+  margin-top: 2px;
+  margin-right: 6px;
+}
+.profile_page__post_hover__item_text {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 700;
+}

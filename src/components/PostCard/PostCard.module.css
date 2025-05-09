@@ -1,0 +1,138 @@
+.post_card {
+  max-width: 100%;
+  border-bottom: 1px solid rgb(var(--ig-separator));
+  padding-bottom: 1.25rem;
+}
+.post_card + .post_card {
+  margin-top: 0.75rem;
+}
+.post_card__header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0.25rem;
+}
+.post_card__post_card__author_avatar {
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+  overflow: hidden;
+}
+.post_card__post_card__author_avatar img {
+  width: inherit;
+  height: inherit;
+}
+.post_card__author_bio__top {
+  display: flex;
+}
+.post_card__created_date {
+  color: rgb(var(--ig-secondary-text));
+}
+.post_card__author_nickname {
+  margin-left: 10px;
+  color: var(--ig-secondary-button);
+  cursor: pointer;
+}
+
+.post_card__author_nickname:hover,
+.post_card__author_nickname:visited:hover {
+  opacity: 0.5;
+}
+
+.post_card__picture {
+  min-width: 100%;
+  border: 1px solid rgb(var(--post-separator));
+  border-radius: 4px;
+  overflow: hidden;
+}
+.post_card__picture img {
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  aspect-ratio: 1 !important;
+  object-fit: cover !important;
+}
+.post_card__buttons {
+  display: flex;
+}
+.post_card__button {
+  font-size: 1.5rem;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+.post_card__button + .post_card__button {
+  margin-left: 1rem;
+}
+.post_card__button + .post_card__button_mark {
+  margin-left: auto;
+}
+.post_card__button:hover {
+  opacity: 0.5;
+}
+.post_card__button_like {
+  animation-duration: 0.45s;
+  animation-name: like-button-animation;
+  animation-timing-function: ease-in-out;
+  transform: scale(1);
+}
+@keyframes like-button-animation {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.post_card__button_like:hover {
+  opacity: 1;
+}
+.post_card__like_string {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.post_card__form {
+  display: grid;
+  grid-template-columns: 7.5fr 2.5fr;
+  position: relative;
+}
+.post_card__form__textarea {
+  font-family: inherit;
+  resize: none;
+  background-color: transparent;
+  border: none;
+  color: rgb(var(--ig-primary-text));
+  padding: 0;
+  outline: none;
+}
+
+.post_card__form__button {
+  font-weight: 600;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgb(var(--ig-primary-button));
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+.post_card__form__button:hover {
+  color: rgb(var(--ig-link));
+}
+.post_card__show_comment_btn {
+  background-color: transparent;
+  color: rgb(var(--ig-secondary-text));
+  border: none;
+  padding: 0;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}

@@ -1,0 +1,63 @@
+.login_page__root {
+    display: flex;
+    align-items: center;
+    height: 100dvh;
+    max-width: 350px;
+    margin: 0 auto;
+}
+.login_page__wrapper {
+    width: 100%;
+    height: max-content;
+}
+.login_page__box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid rgb(var(--ig-elevated-separator), 0.5);
+    border-radius: 1px;
+    margin-bottom: 10px;
+    padding: 12px 8px;
+}
+.login_page__box a {
+    color: rgb(var(--ig-primary-button));
+}
+.login_page__logo {
+    margin: 2rem 0 1rem;
+}
+.login_page__form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.login_page__form__input {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid rgb(var(--ig-stroke), 0.75);
+    flex: 1 0 auto;
+    margin: 0;
+    outline: none;
+    overflow: hidden;
+    padding: 9px 0 7px 8px;
+    text-overflow: ellipsis;
+    margin: 0 40px 6px;
+}
+.login_page__form__btn {
+    margin: 8px 40px;
+    color: #fff;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    background-color: rgba(var(--ig-primary-button));
+    cursor: pointer;
+    border: none;
+}
+.login_page__form__btn:not([disabled]):hover {
+    background-color: rgb(var(--ig-primary-button-hover));
+}
+
+.login_page__form__btn[disabled],
+.login_page__form__btn[disabled]:visited {
+    margin: 8px 40px;
+
+    opacity: 0.7;
+}

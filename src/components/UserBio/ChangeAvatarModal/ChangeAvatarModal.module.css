@@ -1,0 +1,35 @@
+.change_avatar_modal {
+  max-width: 400px;
+  height: max-content;
+}
+.change_avatar_modal__box {
+  display: flex;
+  flex-direction: column;
+}
+.change_avatar_modal__title {
+  width: 100%;
+  text-align: center;
+  padding: 2rem 2rem;
+  font-size: 1.25rem;
+}
+.change_avatar_modal__input {
+  display: none;
+}
+.change_avatar_modal__button {
+  width: 100%;
+  background-color: transparent;
+  color: #fff;
+  border: none;
+  border-top: 1px solid rgb(var(--ig-elevated-separator), 0.1);
+  min-height: 48px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.change_avatar_modal__button___add {
+  font-weight: 700;
+  color: rgb(var(--ig-primary-button));
+}
+.change_avatar_modal__button___delete {
+  font-weight: 700;
+  color: rgb(var(--ig-error-or-destructive));
+}

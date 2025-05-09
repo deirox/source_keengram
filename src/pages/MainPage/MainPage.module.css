@@ -1,0 +1,12 @@
+.main_page__posts {
+  max-width: 470px;
+  margin: 0 auto;
+  width: 100%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  /* overflow-y: scroll; */
+}
+/* @media (max-width: 767px) {
+  .main_page__posts {
+  }
+} */

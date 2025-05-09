@@ -1,0 +1,86 @@
+@import url(./reset.css);
+@import "react-image-gallery/styles/css/image-gallery.css";
+
+:root {
+    --ig-separator: 38, 38, 38;
+    --ig-secondary-text: 168, 168, 168;
+    --ig-secondary-button: 250, 250, 250;
+    --ig-primary-button: 0, 149, 246;
+    --ig-primary-button-hover: 24, 119, 242;
+    --post-separator: 38, 38, 38;
+    --ig-link: 224, 241, 255;
+    --ig-primary-background: 0, 0, 0;
+    --ig-elevated-separator: 219, 219, 219;
+    --ig-secondary-background: 250, 250, 250;
+    --ig-stroke: 219, 219, 219;
+    --overlay-alpha-80: rgba(0, 0, 0, 0.65);
+    --ig-elevated-background: 38, 38, 38;
+    --scrollable-content-header-height: 44px;
+    --ig-tertiary-text: 115, 115, 115;
+    --ig-error-or-destructive: 237, 73, 86;
+    --post-separator: 38, 38, 38;
+}
+*,
+html {
+    box-sizing: border-box;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+body {
+    margin: 0;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+        sans-serif;
+    /* background-color: #fff;
+  color: #000; */
+    background-color: rgb(0, 0, 0);
+    color: #fff;
+}
+code {
+    font-family:
+        source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+.black_theme {
+    background-color: rgb(0, 0, 0);
+    color: #fff;
+}
+.cursorPointer {
+    cursor: pointer;
+}
+.fw500 {
+    font-weight: 500;
+}
+.secondary-text--color {
+    color: rgb(168, 168, 168);
+}
+img {
+    object-fit: cover;
+}
+.container {
+    max-width: 975px;
+    width: 100%;
+    margin: 0 auto;
+}
+.container__profile {
+    max-width: 935px;
+}
+._ac6h {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+._ac6g {
+    color: rgb(var(--ig-secondary-text));
+}
+.relative_block {
+    display: block;
+    position: relative;
+}
+.standart-gray-separator {
+    width: 100%;
+    background-color: rgb(var(--ig-elevated-separator), 0.1);
+    height: 1px;
+}

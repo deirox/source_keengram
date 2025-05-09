@@ -1,0 +1,6 @@
+.profile_page__posts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 28px;
+  grid-row-gap: 28px;
+}

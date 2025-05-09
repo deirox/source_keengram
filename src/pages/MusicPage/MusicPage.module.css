@@ -1,0 +1,29 @@
+.music_page__container {
+    max-width: 470px;
+    margin: 0 auto;
+    width: 100%;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.music_page__header {
+    display: flex;
+    justify-content: space-between;
+    background-color: #10100F;
+    border: 1px solid rgba(98, 100, 97, .25);
+    border-radius: 4px;
+    padding: 12px 24px;
+    margin-bottom: 1rem;
+}
+
+.music_page__updload_btn {
+    cursor: pointer;
+}
+
+.music_page__audio_list {
+    display: flex;
+    flex-direction: column;
+}
+
+
+

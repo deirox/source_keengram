@@ -1,0 +1,91 @@
+.userBio {
+    padding-bottom: 2.75rem;
+}
+
+.userBio__wrapper {
+    padding: 30px 20px 0;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.userBio__lines {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.userBio__line {
+    display: flex;
+    align-items: center;
+}
+
+.userBio__nickname {
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+}
+
+.userBio__button {
+    margin-left: 1.25rem;
+}
+
+.userBio__string {
+    margin-right: 2rem;
+}
+
+.userBio__string_value {
+    font-weight: 700;
+}
+
+.userBio__about {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.userBio__about_string {
+    font-size: 14px;
+    line-height: 18px;
+}
+
+@media (max-width: 767px) {
+    .userBio__wrapper {
+        grid-template-columns: 1fr;
+        grid-row-gap: 1rem;
+    }
+    .userBio__lines {
+        margin: 0 auto;
+    }
+    .userBio__line + .userBio__line {
+        margin-top: 0.75rem;
+    }
+}
+
+@media (max-width: 580px) {
+    .userBio {
+        overflow-x: hidden;
+    }
+    .userBio__string {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        margin-right: 0.5rem;
+    }
+}

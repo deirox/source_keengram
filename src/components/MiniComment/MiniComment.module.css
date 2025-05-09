@@ -1,0 +1,8 @@
+.mini_comment {
+  margin-bottom: 0.5rem;
+}
+.mini_comment__link {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+}

@@ -1,0 +1,22 @@
+.add_images__inner {
+  display: flex;
+  margin: auto;
+  width: max-content;
+  height: max-content;
+  flex-direction: column;
+  align-items: center;
+}
+.add_images__icon {
+  margin-bottom: 1rem;
+}
+.add_images__text {
+  font-size: 1.25rem;
+}
+.add_images__input[type="file"] {
+  display: none;
+}
+.add_images__btn {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  width: fit-content;
+}

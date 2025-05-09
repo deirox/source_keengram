@@ -1,0 +1,49 @@
+{
+  "name": "keengram-v2-ts",
+  "homepage": "https://deirox.github.io/keengram/",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview --host"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.21",
+    "axios": "^1.8.4",
+    "classnames": "^2.5.1",
+    "dayjs": "^1.11.13",
+    "firebase": "^11.6.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
+    "react-image-gallery": "^1.4.0",
+    "react-infinite-scroller": "^1.2.6",
+    "react-loader-spinner": "^6.1.6",
+    "react-modal": "^3.16.3",
+    "react-router-dom": "^7.5.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/howler": "^2.2.12",
+    "@types/react-image-gallery": "^1.2.4",
+    "@types/react-infinite-scroller": "^1.2.5",
+    "@types/react-modal": "^3.16.3",
+    "gh-pages": "^6.3.0",
+    "@vitejs/plugin-legacy": "^6.0.2",
+    "vite-tsconfig-paths": "^5.1.4",
+    "@eslint/js": "^9.21.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react-swc": "^3.8.0",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.24.1",
+    "vite": "^6.2.0"
+  }
+}
