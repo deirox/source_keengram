@@ -1,54 +1,84 @@
-# React + TypeScript + Vite
+# Keengram 📸
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Социальная сеть в стиле Instagram, реализованная на **React**, **Vite** и **react-router-dom**. Проект демонстрирует современные подходы к разработке интерфейсов с использованием TypeScript, Zustand (для управления состоянием) и Firebase (для хранения данных).
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Установка
 
-## Expanding the ESLint configuration
+```bash
+# Клонирование репозитория
+git clone https://github.com/deirox/source_keengram.git
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Переход в директорию проекта
+cd source_keengram
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+# Установка зависимостей
+bun i
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+Запуск разработки:
+```bash
+bun run dev
 ```
+
+---
+
+## 📦 Зависимости
+
+### 🔧 React & Vite
+- `react` (v19.0.0)
+- `react-dom` (v19.0.0)
+- `@vitejs/plugin-react-swc` (v3.8.0)
+- `vite` (v6.2.0)
+
+### 🎨 UI Компоненты
+- `react-icons` (v5.5.0) — иконки
+- `react-image-gallery` (v1.4.0) — галерея изображений
+- `react-modal` (v3.16.3) — модальные окна
+- `react-loader-spinner` (v6.1.6) — спиннеры загрузки
+
+### 🚀 Дополнительные инструменты
+- `react-router-dom` (v7.5.0) — маршрутизация
+- `zustand` (v5.0.3) — управление состоянием
+- `firebase` (v11.6.0) — хранение данных и аутентификация
+
+### 🧪 Разработка
+- `typescript` (v5.7.2)
+- `@types/react` (v19.0.10)
+- `eslint` + `eslint-plugin-react-hooks` — статический анализ кода
+
+---
+
+## ✅ Функционал
+
+- Аутентификация пользователей
+- Создание и редактирование постов с изображениями
+- Галерея с бесконечной прокруткой (`react-infinite-scroller`)
+- Модальные окна для просмотра постов
+- Реальное время обновлений через Firebase
+- Навигация между разделами приложения
+
+---
+
+## 🤝 Вклад
+
+Если вы хотите улучшить проект:
+1. Откройте issue с описанием проблемы или идеи
+2. Или отправьте pull request с вашим кодом
+3. Убедитесь, что вы настроили локальную среду разработки перед внесением изменений
+
+---
+
+## 📄 Лицензия
+
+Проект распространяется под лицензией [MIT](LICENSE). Вы можете изменить её по своему усмотрению.
+
+---
+
+## ⚠️ Примечание
+
+Это рабочий проект, и функционал может быть не полностью завершён. Если вы найдёте ошибки или хотите добавить новые возможности — пожалуйста, сообщите об этом!
+
+[Мой Telegram](https://t.me/keenguydev)
+[Мой VK](https://vk.com/keenguy)
