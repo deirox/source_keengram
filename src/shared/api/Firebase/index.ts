@@ -1,7 +1,3 @@
-export * from "./add";
-export * from "./get";
-export * from "./update";
-export * from "./remove";
 import * as add from "./add";
 import * as get from "./get";
 import * as update from "./update";

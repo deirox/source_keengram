@@ -25,6 +25,7 @@ const AddImages = ({
       // addPost();
     }
   };
+
   return (
     <>
       {active && (
@@ -38,7 +39,7 @@ const AddImages = ({
             type="file"
             ref={filePicker}
             onChange={inputOnChange}
-            accept=".png,.jpg,.jpeg,.gif"
+            accept=".png,.jpg,.jpeg"
             multiple
           />
           <StyleziedButton

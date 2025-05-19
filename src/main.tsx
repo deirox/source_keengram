@@ -14,6 +14,8 @@ import MainPage from "@/pages/MainPage";
 import ErrorPage from "@/pages/ErrorPage";
 
 import dayjs from "dayjs";
+import FCAuthorPage from "./pages/redirects/AuthorPage";
+import FCAuthorRedirectPage from "./pages/redirects/redirect";
 dayjs.locale("ru");
 
 const router = createHashRouter([
@@ -33,6 +35,16 @@ const router = createHashRouter([
       {
         path: "audios",
         element: <MusicPage />,
+      },
+      {
+        path: "author",
+        element: <FCAuthorPage />,
+        children: [
+          {
+            path: ":data",
+            element: <FCAuthorRedirectPage />,
+          },
+        ],
       },
       {
         path: "accounts",

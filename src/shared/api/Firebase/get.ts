@@ -3,6 +3,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   query,
   where,
 } from "firebase/firestore";
@@ -14,21 +15,19 @@ import {
   initialIAuthor,
   initialIAuthorFull,
   initialIAuthorizedUser,
+  initialIPostLike,
   initialIUser,
+  IPostComment,
+  IPostLike,
   TUserInterfaces,
-  TUserTypes,
 } from "@/shared/types/api.types";
 import { useUserStore } from "@/shared/store/useUserStore";
-
-export interface IFirebaseGetUserArgs {
-  by: "uid" | "nickname";
-  data: string;
-  return_type?: TUserTypes;
-}
-
-export type TFirebaseGetUser = (
-  args: IFirebaseGetUserArgs,
-) => Promise<IAPIMethodResponse<TUserInterfaces>>;
+import { orderBy } from "firebase/firestore/lite";
+import {
+  TFirebaseGetComments,
+  TFirebaseGetLike,
+  TFirebaseGetUser,
+} from "./get.types";
 
 /**
  * Returns the average of two numbers.
@@ -45,7 +44,7 @@ export const User: TFirebaseGetUser = async ({
 }) => {
   // @ts-expect-error
   // @ts-nocheck
-  const response: IAPIMethodResponse<TUserInterfaces> =
+  const user_response: IAPIMethodResponse<TUserInterfaces> =
     initialAPIMethodResponse;
   const uploadedUsers = useUserStore.getState().uploadedUsers;
 
@@ -62,7 +61,7 @@ export const User: TFirebaseGetUser = async ({
 
       //Save Authorized User Data to useAppStore
 
-      response.data = user;
+      user_response.data = user;
       //Save Authorized Data to special variable
       // set({
       //   isAuthorizedUserLoading: false,
@@ -70,7 +69,7 @@ export const User: TFirebaseGetUser = async ({
       // });
     } else {
       console.error("No such document!");
-      return { ...response, status: "error", error: "No such document!" };
+      return { ...user_response, status: "error", error: "No such document!" };
     }
   }
   if (by === "nickname") {
@@ -82,33 +81,104 @@ export const User: TFirebaseGetUser = async ({
     if (querySnapshot.docs.length > 0) {
       querySnapshot.forEach((doc) => {
         const user = { uid: doc.id, ...doc.data() } as IAuthorizedUser;
-        response.data = user;
+        user_response.data = user;
       });
     } else {
-      return { ...response, status: "error", error: "No such document!" };
+      return { ...user_response, status: "error", error: "No such document!" };
     }
   }
   useUserStore.setState({
     uploadedUsers: [
       ...uploadedUsers,
-      Object.assign(initialIAuthor, response.data),
+      Object.assign(initialIAuthor, user_response.data),
     ],
   });
   switch (return_type) {
     case "IAuthor":
-      response.data = Object.assign(initialIAuthor, response.data);
+      user_response.data = Object.assign(initialIAuthor, user_response.data);
       break;
     case "IAuthorFull":
-      response.data = Object.assign(initialIAuthorFull, response.data);
+      user_response.data = Object.assign(
+        initialIAuthorFull,
+        user_response.data,
+      );
       break;
     case "IAuthorizedUser":
-      response.data = Object.assign(initialIAuthorizedUser, response.data);
+      user_response.data = Object.assign(
+        initialIAuthorizedUser,
+        user_response.data,
+      );
       break;
     default:
-      response.data = Object.assign(initialIUser, response.data);
+      user_response.data = Object.assign(initialIUser, user_response.data);
       break;
   }
 
-  response.status = "success";
-  return response;
+  user_response.status = "success";
+  return user_response;
+};
+
+export const Comment: TFirebaseGetComments = async ({
+  post_uid = "",
+  // page = 0,
+  // limit_count = 10,
+}) => {
+  const comment_response: IAPIMethodResponse<IPostComment[]> = {
+    ...initialAPIMethodResponse,
+    data: [],
+  };
+  try {
+    const docRef = collection(db, "comments");
+    const q = query(
+      docRef,
+      where("post_uid", "==", post_uid),
+      orderBy("comment_id", "asc"),
+      limit(10),
+    );
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      const comment = { ...doc.data(), uid: doc.id } as IPostComment;
+      comment_response.data?.push(comment);
+    });
+  } catch (e) {
+    console.error(e);
+    comment_response.status = "error";
+    comment_response.error = e;
+  }
+  return comment_response;
+};
+
+export const Like: TFirebaseGetLike = async ({
+  post_uid,
+  user_uid,
+  // page = 0,
+  // limit_count = 10,
+}) => {
+  const like_response: IAPIMethodResponse<IPostLike> = {
+    ...initialAPIMethodResponse,
+    data: initialIPostLike,
+  };
+  try {
+    const docRef = collection(db, "likes");
+    const q = query(
+      docRef,
+      where("post_uid", "==", post_uid),
+      where("user_uid", "==", user_uid),
+      limit(1),
+    );
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.size > 0) {
+      querySnapshot.forEach((snapshot) => {
+        like_response.data = {
+          ...snapshot.data(),
+          uid: snapshot.id,
+        } as unknown as IPostLike;
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    like_response.status = "error";
+    like_response.error = e;
+  }
+  return like_response;
 };

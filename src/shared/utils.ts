@@ -1,35 +1,14 @@
 import dayjs from "dayjs";
+import { IPost } from "./types/api.types";
 // let isYesterday = require("dayjs/plugin/isYesterday");
 
 interface IUtils {
   isMatch: (initialValue: string, enteredValue: string) => boolean;
   declOfNum: (n: number, text_forms: string[]) => string;
-
   skloneniye: (number: number, txt: string[]) => string;
-  calculatePostWeight: (post: any) => number;
+  calculatePostWeight: (post: IPost) => number;
   makeid: (length: number) => string;
 }
-
-export const calculatePostWeight = (post: any) => {
-  const dateNow = dayjs(dayjs().format());
-  const dateDiff = dateNow.diff(post.created_date, "day");
-  let dateRate;
-  switch (dateDiff) {
-    case 0:
-    case 1:
-      dateRate = 2;
-      break;
-    case 2:
-      dateRate = 1;
-      break;
-    default:
-      dateRate = 0;
-  }
-  const postWeight = Number(
-    post.likes?.length + post.comments?.length + dateRate,
-  );
-  return postWeight;
-};
 
 export const utils: IUtils = {
   isMatch: (initialValue, enteredValue) => {
@@ -57,9 +36,9 @@ export const utils: IUtils = {
         : cases[number % 10 < 5 ? number % 10 : 5]
     ];
   },
-  calculatePostWeight: (post: any) => {
+  calculatePostWeight: (post) => {
     const dateNow = dayjs(dayjs().format());
-    const dateDiff = dateNow.diff(post.created_date, "day");
+    const dateDiff = dateNow.diff(post.created_at.nanoseconds, "day");
     let dateRate;
     switch (dateDiff) {
       case 0:
@@ -75,7 +54,7 @@ export const utils: IUtils = {
         dateRate = 0;
     }
     const postWeight = Number(
-      post.likes?.length + post.comments?.length + dateRate,
+      post.likes.length + post.comments.length + dateRate * 3,
     );
     return postWeight;
   },

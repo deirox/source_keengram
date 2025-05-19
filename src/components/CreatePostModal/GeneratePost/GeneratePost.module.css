@@ -1,42 +1,61 @@
 .generate_post__root {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  overflow: hidden;
-  height: 100%;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    overflow: hidden;
+    height: 100%;
+}
+.generate_post__gallery {
+    width: 100%;
+    height: 100%;
+}
+.generate_post__gallery div {
+    width: 100%;
+    height: 100%;
 }
 .generate_post__gallery img {
-  aspect-ratio: 1;
-  object-fit: cover !important;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover !important;
 }
 .generate_post__box {
-  padding: 1rem;
+    padding: 1rem;
 }
 .generate_post__badge {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.85rem;
 }
 .generate_post__avatar {
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-right: 0.8rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 0.8rem;
 }
 .generate_post__nickname {
-  font-weight: 600;
+    font-weight: 600;
 }
 .generate_post__textarea {
-  background-color: transparent;
-  color: rgb(var(--ig-primary-text));
-  border: none;
-  padding: 0.5rem 0;
-  width: 100%;
-  font-size: 1rem;
-  outline: none;
-  resize: none;
+    background-color: transparent;
+    color: rgb(var(--ig-primary-text));
+    border: none;
+    padding: 0.5rem 0;
+    width: 100%;
+    font-size: 1rem;
+    outline: none;
+    resize: none;
 }
 .generate_post__textarea___length {
-  text-align: right;
-  color: rgb(var(--ig-tertiary-text));
+    text-align: right;
+    color: rgb(var(--ig-tertiary-text));
+}
+
+@media screen and (max-width: 736px) {
+    .generate_post__root {
+        display: grid;
+        grid-template-columns: initial;
+        overflow: scroll;
+        height: 100%;
+    }
 }

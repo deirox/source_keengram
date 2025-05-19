@@ -73,7 +73,7 @@ const LoginPage = () => {
       <div className={styles.login_page__wrapper}>
         <div className={styles.login_page__box}>
           <div className={styles.login_page__logo}>
-            <img src="/keengram/img/logo.png" alt="black logo keengram" />
+            <img src="img/logo.png" alt="black logo keengram" />
           </div>
           <form
             className={styles.login_page__form}

@@ -8,7 +8,7 @@ const MetaNavigation = () => {
         <source media="(max-width:1265px)" srcSet="img/keengram.svg" />
         <img
           className={styles.navigation__logo}
-          src="img/logo.png"
+          src="img/logo.svg"
           alt="logo"
         />
       </picture>

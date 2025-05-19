@@ -3,13 +3,14 @@ import { create } from "zustand";
 // import { API_ENDPOINT } from "../../api/Api";
 import { db } from "@/shared/api/firebase";
 // import { useAppStore } from "@/shared/store/useAppStore";
-import APIFirebase, { IFirebaseGetUserArgs } from "@/shared/api/Firebase/index";
+import APIFirebase from "@/shared/api/Firebase/index";
 import {
   IAuthorFull,
   IAuthorizedUser,
   initialIAuthor,
   TUserInterfaces,
 } from "@/shared/types/api.types";
+import { IFirebaseGetUserArgs } from "@/shared/api/Firebase/get.types";
 
 // const URL = "/users";
 // const uploadedUsers = useAppStore.getState().uploadedUsers;

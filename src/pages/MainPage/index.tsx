@@ -65,7 +65,7 @@ const MainPage = () => {
               {posts.length > totalCount && (
                 <p
                   style={{
-                    margin: "1rem 0",
+                    margin: "1rem 0 3rem",
                     textAlign: "center",
                     color: "rgb(var(--ig-secondary-text))",
                   }}

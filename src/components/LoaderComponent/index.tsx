@@ -15,7 +15,7 @@ const LoaderComponent = ({
         <div className={styles.loader__root}>
           <img
             className={styles.loader__icon}
-            src="/keengram/img/keengram.svg"
+            src="img/keengram.svg"
             alt="loader"
           />
           <p className={styles.loader__text}>{text}</p>
@@ -25,7 +25,7 @@ const LoaderComponent = ({
         <div>
           <img
             className={styles.loader__icon_mini}
-            src="/keengram/img/keengram.svg"
+            src="img/keengram.svg"
             alt="loader"
           />
         </div>

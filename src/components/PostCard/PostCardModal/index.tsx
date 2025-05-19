@@ -1,17 +1,17 @@
 import cn from "classnames";
-import { FC } from "react";
+import { BaseSyntheticEvent, FC, useState } from "react";
 import { BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
 import { FaRegComment } from "react-icons/fa";
 import ReactImageGallery from "react-image-gallery";
 import { Link } from "react-router-dom";
 import { usePostsStore } from "@/shared/store/usePostsStore";
 import { useUserStore } from "@/shared/store/useUserStore";
-// import MiniComment from "@/components/MiniComment";
 import ModalBody from "@/components/ModalBody";
 import styles from "./PostCardModal.module.css";
-import { IPost } from "@/shared/types/api.types";
+import { initialIBigDataWithLength, IPost } from "@/shared/types/api.types";
+import MiniComment from "@/components/MiniComment";
 
-interface IFCPostCardModal extends Omit<IPost, "t"> {
+interface IFCPostCardModal extends IPost {
   isOpen: boolean;
   onClose: () => void;
 }
@@ -20,8 +20,8 @@ const PostCardModal: FC<IFCPostCardModal> = ({
   uid = "",
   media = [],
   created_at = 0,
-  likes,
-  comments = [],
+  likes = initialIBigDataWithLength,
+  comments = initialIBigDataWithLength,
   author,
   isOpen = false,
   onClose = () => {},
@@ -29,32 +29,31 @@ const PostCardModal: FC<IFCPostCardModal> = ({
   const formatedImages = media.map((m) => {
     return { ...m, original: m.url, thumbnail: m.url };
   });
-  // const [commentValue, setCommentValue] = useState("");
+  const [commentValue, setCommentValue] = useState("");
   const mutateLike = usePostsStore((state) => state.mutateLike);
-  // const addComment = usePostsStore((state) => state.addComment);
-  // const isMutatePostsLoading = usePostsStore(
-  //   (state) => state.isMutatePostsLoading,
-  // );
+  const addComment = usePostsStore((state) => state.addComment);
+  const isMutatePostsLoading = usePostsStore(
+    (state) => state.isMutatePostsLoading,
+  );
   const authorizedUserData = useUserStore((state) => state.authorizedUserData);
   const onLike = () => {
     console.log(created_at, comments);
     if (authorizedUserData) {
-      mutateLike(uid, authorizedUserData.uid);
+      mutateLike({
+        like_uid: likes.data.length > 0 ? likes.data[0].uid : "",
+        postUid: uid,
+        userUid: authorizedUserData.uid,
+        action: likes.data.length > 0 ? "remove" : "add",
+      });
     }
   };
-  // const onAddComment = async (e) => {
-  //   e.preventDefault();
-  //   if (commentValue.length > 0) {
-  //     await addComment(
-  //       uid,
-  //       authorizedUserData.nickname,
-  //       commentValue,
-  //       isUserPosts && true,
-  //     );
-  //     setCommentValue("");
-  //   }
-  // };
-  //
+  const onAddComment = async (e: BaseSyntheticEvent) => {
+    e.preventDefault();
+    if (authorizedUserData && commentValue.length > 0) {
+      addComment(uid, authorizedUserData.uid, commentValue, false);
+      setCommentValue("");
+    }
+  };
   return (
     <ModalBody
       isModalOpen={isOpen}
@@ -64,6 +63,7 @@ const PostCardModal: FC<IFCPostCardModal> = ({
       <div className={styles.post_card_modal__box}>
         <div className={styles.post_card_modal__images}>
           <ReactImageGallery
+            lazyLoad
             items={formatedImages}
             showBullets={formatedImages.length > 1}
             showThumbnails={false}
@@ -91,23 +91,28 @@ const PostCardModal: FC<IFCPostCardModal> = ({
             </div>
           )}
 
-          {/* <div className={styles.post_card_modal__comments}>
-            {comments.length > 0 likes? (
-              comments.map(({ nickname, text }, index) => (
-                <MiniComment
-                  key={index}
-                  classname={styles.post_card_modal__comment}
-                  nickname={nickname}
-                  text={text}
-                />
-              ))
+          <div className={styles.post_card_modal__comments}>
+            {comments.length > 0 ? (
+              comments.data.map(({ author, text }, index) => {
+                if (typeof author === "object") {
+                  return (
+                    <MiniComment
+                      key={index}
+                      classname={styles.post_card_modal__comment}
+                      nickname={author.nickname}
+                      text={text}
+                    />
+                  );
+                }
+                return <></>;
+              })
             ) : (
               <div className={styles.post_card_modal__comments_is_null}>
                 <h3>Нет комментариев.</h3>
                 <p>Начните переписку.</p>
               </div>
             )}
-          </div> */}
+          </div>
           <div className={styles.post_card_modal__inner_images}>
             <ReactImageGallery
               items={formatedImages}
@@ -124,7 +129,9 @@ const PostCardModal: FC<IFCPostCardModal> = ({
                 className={cn(
                   styles.post_card_modal__button,
                   authorizedUserData
-                    ? likes.data.includes(authorizedUserData.uid)
+                    ? likes.data.filter(
+                        (like) => like.user_uid === authorizedUserData.uid,
+                      ).length > 0
                       ? styles.post_card_modal__button_like
                       : ""
                     : "",
@@ -132,7 +139,9 @@ const PostCardModal: FC<IFCPostCardModal> = ({
                 onClick={onLike}
               >
                 {authorizedUserData &&
-                likes.data.includes(authorizedUserData.uid) ? (
+                likes.data.filter(
+                  (like) => like.user_uid === authorizedUserData.uid,
+                ).length > 0 ? (
                   <BsSuitHeartFill color="rgb(255, 48, 64)" />
                 ) : (
                   <BsSuitHeart color="#fff" />
@@ -150,7 +159,7 @@ const PostCardModal: FC<IFCPostCardModal> = ({
                   : `${likes.data.length} отметка "Нравиться"`
                 : `Поставьте первую отметку "Нравиться"!`}
             </p>
-            {/* <form
+            <form
               className={styles.post_card_modal__form}
               onSubmit={(e) => {
                 onAddComment(e);
@@ -159,17 +168,15 @@ const PostCardModal: FC<IFCPostCardModal> = ({
             >
               <textarea
                 className={styles.post_card_modal__form_textarea}
-                type="text"
                 placeholder="Добавьте комментарий..."
                 maxLength={200}
                 value={commentValue}
                 onChange={(e) => setCommentValue(e.target.value)}
-                resize="none"
               />
               <button className={styles.post_card_modal__form_button}>
                 Опубликовать
               </button>
-            </form> */}
+            </form>
           </div>
         </div>
       </div>

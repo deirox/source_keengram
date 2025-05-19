@@ -1,40 +1,49 @@
 .modal_body__root {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 .modal_body__portal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--overlay-alpha-80);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--overlay-alpha-80);
 }
 .modal_body__overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--overlay-alpha-80);
-  z-index: 999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--overlay-alpha-80);
+    z-index: 999;
 }
 .modal_body__content {
-  position: absolute;
-  inset: 40px;
-  background: rgb(var(--ig-elevated-background));
-  overflow: auto;
-  border-radius: 0.75rem;
-  outline: none;
-  margin: auto;
+    position: absolute;
+    inset: 40px;
+    background: rgb(var(--ig-elevated-background));
+    overflow: auto;
+    border-radius: 0.75rem;
+    outline: none;
+    margin: auto;
 }
 .modal_body__close_btn {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.5rem;
-  cursor: pointer;
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    z-index: 1;
+}
+
+@media screen and (max-width: 736px) {
+    .modal_body__content {
+        inset: 0 !important;
+        overflow-y: scroll !important;
+        border-radius: 0 !important;
+    }
 }

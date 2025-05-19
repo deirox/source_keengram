@@ -38,7 +38,7 @@ const ProfilePage = () => {
         effectRun.current = true;
       };
     }
-  }, []);
+  }, [getUser, getUserPosts, userNickname]);
   return (
     <>
       {isUserLoading ? (
@@ -50,7 +50,7 @@ const ProfilePage = () => {
       ) : (
         <div className="container container__profile">
           <UserBio
-            userData={userData as IAuthorFull}
+            userData={userData as IAuthorFull | null}
             authorizedUserData={authorizedUserData as IAuthorFull}
             postsLength={posts.length}
           />

@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { FC, lazy, useState } from "react";
+import { BaseSyntheticEvent, FC, lazy, Suspense, useState } from "react";
 import { BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
 import { FaRegComment } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -14,6 +14,7 @@ const PostCardModal = lazy(() => import("./PostCardModal"));
 
 import relativeTime from "dayjs/plugin/relativeTime";
 import { initialIFirebaseCreatedAt, IPost } from "@/shared/types/api.types";
+import MiniComment from "../MiniComment";
 dayjs.extend(relativeTime);
 
 const PostCard: FC<IPost> = (post) => {
@@ -27,11 +28,11 @@ const PostCard: FC<IPost> = (post) => {
   } = post;
   const authorizedUserData = useUserStore((state) => state.authorizedUserData);
   const mutateLike = usePostsStore((state) => state.mutateLike);
-  // const isMutatePostsLoading = usePostsStore(
-  //   (state) => state.isMutatePostsLoading,
-  // );
-  // const addComment = usePostsStore((state) => state.addComment);
-  // const [comment, setComment] = useState("");
+  const isMutatePostsLoading = usePostsStore(
+    (state) => state.isMutatePostsLoading,
+  );
+  const addComment = usePostsStore((state) => state.addComment);
+  const [comment, setComment] = useState("");
   const [isPostCardModalOpen, setIsPostCardModalOpen] = useState(false);
 
   const formatedImages = media.map((m) => {
@@ -40,16 +41,22 @@ const PostCard: FC<IPost> = (post) => {
 
   const onLike = () => {
     if (authorizedUserData) {
-      mutateLike(uid, authorizedUserData.uid);
+      console.log("likes", likes);
+      mutateLike({
+        like_uid: likes.data.length > 0 ? likes.data[0].uid : "",
+        postUid: uid,
+        userUid: authorizedUserData.uid,
+        action: likes.data.length > 0 ? "remove" : "add",
+      });
     }
   };
-  // const onAddComment = (e) => {
-  //   e.preventDefault();
-  //   if (comment.length > 0) {
-  //     addComment(uid, authorizedUserData.nickname, comment);
-  //     setComment("");
-  //   }
-  // };
+  const onAddComment = (e: BaseSyntheticEvent) => {
+    e.preventDefault();
+    if (comment.length > 0 && authorizedUserData) {
+      addComment(uid, authorizedUserData.uid, comment);
+      setComment("");
+    }
+  };
   const onModalOpen = () => {
     setIsPostCardModalOpen(true);
   };
@@ -58,17 +65,19 @@ const PostCard: FC<IPost> = (post) => {
   };
   return (
     <article className={styles.post_card}>
-      <PostCardModal
-        uid={uid}
-        media={media}
-        created_at={created_at}
-        likes={likes}
-        comments={comments}
-        author={author}
-        isOpen={isPostCardModalOpen}
-        onClose={onModalClose}
-        post_weight={post.post_weight}
-      />
+      <Suspense fallback={<></>}>
+        <PostCardModal
+          uid={uid}
+          media={media}
+          created_at={created_at}
+          likes={likes}
+          comments={comments}
+          author={author}
+          isOpen={isPostCardModalOpen}
+          onClose={onModalClose}
+          post_weight={post.post_weight}
+        />
+      </Suspense>
       {typeof author !== "string" && author.avatar && (
         <div className={styles.post_card__header}>
           <div className={styles.post_card__post_card__author_avatar}>
@@ -119,14 +128,18 @@ const PostCard: FC<IPost> = (post) => {
             className={cn(
               styles.post_card__button,
               authorizedUserData !== null &&
-                likes.data.includes(authorizedUserData.uid)
+                likes.data.filter(
+                  (like) => like.user_uid === authorizedUserData.uid,
+                ).length > 0
                 ? styles.post_card__button_like
                 : "",
             )}
             onClick={onLike}
           >
             {authorizedUserData !== null &&
-            likes.data.includes(authorizedUserData.uid) ? (
+            likes.data.filter(
+              (like) => like.user_uid === authorizedUserData.uid,
+            ).length > 0 ? (
               <BsSuitHeartFill color="rgb(255, 48, 64)" />
             ) : (
               <BsSuitHeart color="#fff" />
@@ -144,14 +157,14 @@ const PostCard: FC<IPost> = (post) => {
               : `${likes.length} отметка "Нравиться"`
             : `Поставьте первую отметку "Нравиться"!`}
         </p>
-        {/* {comments.length > 0 && (
+        {comments.length > 0 && (
           <MiniComment
             nickname={
-              comments[0]?.author
-                ? comments[0]?.author.nickname
-                : comments[0]?.nickname
+              typeof comments.data[0]?.author === "object"
+                ? comments.data[0]?.author.nickname
+                : ""
             }
-            text={comments[0]?.text}
+            text={comments.data[0]?.text}
           />
         )}
         {comments.length > 1 && (
@@ -161,8 +174,8 @@ const PostCard: FC<IPost> = (post) => {
           >
             Показать все комментарии ({comments.length})
           </button>
-        )} */}
-        {/* <form
+        )}
+        <form
           className={styles.post_card__form}
           onSubmit={(e) => {
             onAddComment(e);
@@ -171,19 +184,19 @@ const PostCard: FC<IPost> = (post) => {
         >
           <textarea
             className={styles.post_card__form__textarea}
-            type="text"
+            // type="text"
             placeholder="Добавьте комментарий..."
             maxLength={200}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            resize="none"
+            // resize="none"
           />
           {comment.length > 0 && (
             <button className={styles.post_card__form__button}>
               Опубликовать
             </button>
           )}
-        </form> */}
+        </form>
       </div>
     </article>
   );

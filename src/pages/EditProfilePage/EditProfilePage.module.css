@@ -1,95 +1,116 @@
 /* .edit_profile_page__root {
 } */
 .edit_profile_page__top {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    text-align: center;
 }
 .edit_profile_page__top p {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-weight: 600;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 600;
 }
 .edit_profile_page__top::before {
-  background-color: rgba(var(--ig-elevated-separator), 0.25);
-  bottom: -1px;
-  content: "";
-  height: 1px;
-  left: 0;
-  position: absolute;
-  right: 0;
+    background-color: rgba(var(--ig-elevated-separator), 0.25);
+    bottom: -1px;
+    content: "";
+    height: 1px;
+    left: 0;
+    position: absolute;
+    right: 0;
 }
 .edit_profile_page__top_btn {
-  background-color: transparent;
-  border: none;
-  display: inline-block;
-  transform: rotate(270deg);
-  cursor: pointer;
+    background-color: transparent;
+    border: none;
+    display: inline-block;
+    transform: rotate(270deg);
+    cursor: pointer;
 }
 .edit_profile_page__box_wrapper {
-  padding: 2rem;
+    padding: 2rem;
 }
 .edit_profile_page__box {
-  margin: 0 auto;
-  border: 1px solid rgba(var(--ig-elevated-separator), 0.2);
-  background-color: rgb(var(--ig-primary-background));
+    margin: 0 auto;
+    border: 1px solid rgba(var(--ig-elevated-separator), 0.2);
+    background-color: rgb(var(--ig-primary-background));
 }
 .edit_profile_page__items {
-  display: flex;
-  flex-direction: column;
-  margin: 1rem 0;
-  padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0;
+    padding: 0 1rem;
 }
 .edit_profile_page__item {
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-column-gap: 2rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 2rem;
 }
+
 .edit_profile_page__item_title {
-  font-weight: 700;
-  text-align: right;
-  margin-top: 0.4rem;
+    font-weight: 700;
+    text-align: right;
+    margin-top: 0.4rem;
 }
 .edit_profile_page__item__input_box {
-  width: 100%;
+    width: 100%;
 }
 .edit_profile_page__item__input {
-  border: 1px solid rgba(var(--ig-stroke), 0.5);
-  outline: none;
-  background-color: #000;
-  border-radius: 3px;
-  color: #fff;
-  font-size: 1rem;
-  height: 2rem;
-  padding: 0 10px;
-  resize: vertical;
-  width: 100%;
+    border: 1px solid rgba(var(--ig-stroke), 0.5);
+    outline: none;
+    background-color: #000;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 1rem;
+    min-height: 2rem;
+    padding: 0 10px;
+    resize: vertical;
+    width: 100%;
 }
 .edit_profile_page__item__text {
-  margin: 1rem 0 0.5rem;
-  color: rgb(var(--ig-secondary-text));
-  font-size: 0.75rem;
-  line-height: 1rem;
+    margin: 1rem 0 0.5rem;
+    color: rgb(var(--ig-secondary-text));
+    font-size: 0.75rem;
+    line-height: 1rem;
 }
 .edit_profile_page__item__text_title {
-  color: rgb(var(--ig-secondary-text));
-  font-size: 0.9rem;
-  line-height: 1.1rem;
-  font-weight: 600;
+    color: rgb(var(--ig-secondary-text));
+    font-size: 0.9rem;
+    line-height: 1.1rem;
+    font-weight: 600;
 }
 .edit_profile_page__escape_btn {
-  display: block;
-  margin: 0 auto;
-  cursor: pointer;
-  background-color: transparent;
-  border: none;
-  color: rgb(var(--ig-error-or-destructive));
-  opacity: 0.75;
+    display: block;
+    margin: 0 auto;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    color: rgb(var(--ig-error-or-destructive));
+    opacity: 0.75;
 }
 .edit_profile_page__escape_btn:hover {
-  opacity: 0.5;
+    opacity: 0.5;
+}
+
+@media screen and (max-width: 900px) {
+    .edit_profile_page__items {
+        max-width: 30rem;
+        margin: 1rem auto;
+    }
+    .edit_profile_page__item {
+        grid-template-columns: 1fr;
+        width: 100%;
+        grid-column-gap: 0rem;
+    }
+    .edit_profile_page__item + .edit_profile_page__item {
+        margin-top: 1rem;
+    }
+    .edit_profile_page__item_title {
+        text-align: left;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
 }

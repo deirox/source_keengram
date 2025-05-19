@@ -20,6 +20,9 @@ const ModalBody = ({
   onClose = () => {},
 }: IModalBody) => {
   ReactModal.setAppElement("#root");
+  if (isModalOpen) {
+    document.body.style.overflow = "hidden";
+  }
   return (
     <ReactModal
       isOpen={isModalOpen}
@@ -29,9 +32,18 @@ const ModalBody = ({
       className={`${classname} ${styles.modal_body__content} ${
         modalClassname && modalClassname
       }`}
-      onRequestClose={onClose}
+      onRequestClose={() => {
+        document.body.style.overflow = "";
+        onClose();
+      }}
     >
-      <div className={styles.modal_body__close_btn} onClick={onClose}>
+      <div
+        className={styles.modal_body__close_btn}
+        onClick={() => {
+          document.body.style.overflow = "";
+          onClose();
+        }}
+      >
         <svg
           aria-label="Закрыть"
           color="rgb(255, 255, 255)"

@@ -9,6 +9,7 @@ import styles from "./AudioCard.module.css";
 import { HiPlay, HiStop } from "react-icons/hi";
 import { useAudioStore } from "../store";
 import { IAudio } from "@/shared/types/api.types";
+import { Link } from "react-router-dom";
 
 interface IFCAudioCard {
   audio: IAudio;
@@ -62,19 +63,13 @@ const AudioCard: FC<IFCAudioCard> = ({ audio }) => {
     if (sound) {
       setDuration(sound.duration);
     }
-
-    // console.log(currentTime);
   }, [sound, currentTime]);
 
   useEffect(() => {
     if (sound) {
       sound.volume = volume;
     }
-  }, [volume]);
-
-  useEffect(() => {
-    console.log("isAudioPlaying", isAudioPlaying);
-  }, [isAudioPlaying]);
+  }, [volume, sound]);
 
   const onAudioPlayButton = async () => {
     setIsAudioPlaying(true);
@@ -128,15 +123,32 @@ const AudioCard: FC<IFCAudioCard> = ({ audio }) => {
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <div>
-                    <p>{audio.artist}</p>
                     <p>{audio.title}</p>
+                    {typeof audio.author === "string" && (
+                      <Link to={`/author/uid=${audio.author}`}>
+                        <p style={{ opacity: 0.75 }}>{audio.artist}</p>
+                      </Link>
+                    )}
+                    {typeof audio.author === "object" && (
+                      <Link to={`/author/nickname=${audio.author.nickname}`}>
+                        <p style={{ opacity: 0.75 }}>{audio.artist}</p>
+                      </Link>
+                    )}
                   </div>
                   <p>
                     {minutes}:{secondsFormated}
                   </p>
                 </div>
                 <div
-                  className={styles.music_page__audio_card__info_duration_line}
+                  style={{
+                    position: "relative",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: ".25rem",
+                    // width: "19.4rem",
+                    backgroundColor: "rgba(98, 100, 97, .25)",
+                  }}
                   onClick={(e) => {
                     if (audioCardInfoRef?.current) {
                       const current = audioCardInfoRef?.current;
@@ -145,33 +157,27 @@ const AudioCard: FC<IFCAudioCard> = ({ audio }) => {
                         current?.getBoundingClientRect()?.left;
                       const curPos = e.pageX - targetBoundingLeft;
                       if (sound !== null && curPos < width) {
-                        // console.log("width", width);
-
+                        sound.play();
                         if (width !== 0 && duration !== 0) {
-                          // console.log("duration", sound.duration);
-                          // console.log("curPos", curPos);
-
                           sound.currentTime = (curPos / width) * duration;
                         }
                       }
                     }
                   }}
-                  style={{
-                    position: "relative",
-                    width:
-                      currentTime === 0 ? 0 + "px" : curDurationLineSize + "px",
-                    height: ".25rem",
-                    backgroundColor: "#F4F9FC",
-                  }}
                 >
                   <div
+                    className={
+                      styles.music_page__audio_card__info_duration_line
+                    }
                     style={{
+                      pointerEvents: "none",
                       position: "absolute",
-                      top: 0,
-                      left: 0,
+                      width:
+                        currentTime === 0
+                          ? 0 + "px"
+                          : curDurationLineSize + "px",
                       height: ".25rem",
-                      width: "19.4rem",
-                      backgroundColor: "rgba(98, 100, 97, .25)",
+                      backgroundColor: "#F4F9FC",
                     }}
                   />
                 </div>

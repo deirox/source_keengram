@@ -1,15 +1,7 @@
 // import axios from "axios";
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
+import { deleteObject, ref } from "firebase/storage";
 import { create } from "zustand";
 import { storage } from "@/shared/api/firebase";
-import utils from "../../utils";
-
-// import { API_ENDPOINT } from "../../api/Api";
 
 interface IFirebaseStore {
   isUploadedImages: boolean;
@@ -26,55 +18,8 @@ export const useFirebaseStore = create<IFirebaseStore>((set, get) => ({
   uploadedImages: [],
   deletedImages: [],
   uploadImages: async (files, filesLength) => {
-    // @ts-ignore
-    set({ uploadedImages: [], isUploadImages: false });
-    const uploadedImages = get().uploadedImages;
-    files.forEach(async (file: any) => {
-      //   console.log(file.name);
-      // const fileName = file.name;
-      const fileName = utils.makeid(20);
-      const storageRef = ref(storage, `images/${fileName}`);
-
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      await uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
-          switch (snapshot.state) {
-            case "paused":
-              // console.log("Upload is paused");
-              break;
-            case "running":
-              // console.log("Upload is running");
-              break;
-          }
-        },
-        (error) => {
-          // Handle unsuccessful uploads
-          console.log("Error: ", error);
-        },
-        () => {
-          // Handle successful uploads on complete
-          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            // downloadURLs = [...downloadURLs, { url: downloadURL }];
-            set((state) => ({
-              uploadedImages: [
-                ...state.uploadedImages,
-                { name: fileName, url: downloadURL },
-              ],
-            }));
-            // console.log("File ", fileName, " available at: ", downloadURL);
-          });
-        },
-      );
-      if (uploadedImages.length === filesLength) {
-        set({ isUploadedImages: true });
-      }
-    });
+    set({ uploadedImages: [], isUploadedImages: false });
+    console.log("uploadImages", files, filesLength);
   },
   deleteImages: () => {
     // Create a reference to the file to delete

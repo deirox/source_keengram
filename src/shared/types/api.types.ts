@@ -30,10 +30,14 @@ export type TUserTypes =
   | "IAuthor"
   | "IAuthorFull";
 
-export interface IBigDataWithLength<T> {
+export interface IBigDataWithLength<T = null> {
   data: T;
   length: number;
 }
+export const initialIBigDataWithLength: IBigDataWithLength<[]> = {
+  data: [],
+  length: 0,
+};
 
 export interface IUser {
   type: TUserTypes;
@@ -56,7 +60,7 @@ export const initialIAuthor: IAuthor = {
   ...initialIUser,
   type: "IAuthor",
   avatar: {
-    url: "/keengram/img/EmptyAvatar.jpg",
+    url: "keengram/img/EmptyAvatar.jpg",
   },
   nickname: "",
   name: "",
@@ -75,14 +79,8 @@ export const initialIAuthorFull: IAuthorFull = {
   type: "IAuthorFull",
   created_at: initialIFirebaseCreatedAt,
   description: "",
-  subscribed: {
-    data: [],
-    length: 0,
-  },
-  subscribers: {
-    data: [],
-    length: 0,
-  },
+  subscribed: initialIBigDataWithLength,
+  subscribers: initialIBigDataWithLength,
 };
 
 export interface IAuthorizedUser extends IAuthorFull {
@@ -99,13 +97,27 @@ export const initialIAuthorizedUser: IAuthorizedUser = {
   isAuth: false,
 };
 
+export interface IPostLike {
+  uid: string;
+  post_uid: string;
+  user_uid: string;
+  created_at: IFirebaseCreatedAt;
+}
+
+export const initialIPostLike: IPostLike = {
+  uid: "",
+  post_uid: "",
+  user_uid: "",
+  created_at: initialIFirebaseCreatedAt,
+};
+
 export interface IPostComment {
   uid: string;
   author: string | IAuthor;
   comment_id: number;
   post_uid: string;
   text: string;
-  timestamp: number;
+  created_at: IFirebaseCreatedAt;
 }
 
 export const initialIPostComment: IPostComment = {
@@ -114,7 +126,7 @@ export const initialIPostComment: IPostComment = {
   comment_id: 0,
   post_uid: "",
   text: "",
-  timestamp: 0,
+  created_at: initialIFirebaseCreatedAt,
 };
 export interface IPostMedia {
   uid: string;
@@ -127,7 +139,7 @@ export interface IPost {
   author: string | IAuthor;
   comments: IBigDataWithLength<IPostComment[]>;
   media: IPostMedia[];
-  likes: IBigDataWithLength<string[]>;
+  likes: IBigDataWithLength<IPostLike[]>;
   post_weight: number;
   created_at: IFirebaseCreatedAt;
 }
@@ -135,15 +147,9 @@ export interface IPost {
 export const initialIPost: IPost = {
   uid: "",
   author: "",
-  comments: {
-    data: [],
-    length: 0,
-  },
+  comments: initialIBigDataWithLength,
   media: [],
-  likes: {
-    data: [],
-    length: 0,
-  },
+  likes: initialIBigDataWithLength,
   post_weight: 0,
   created_at: initialIFirebaseCreatedAt,
 };

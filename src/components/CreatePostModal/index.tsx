@@ -10,12 +10,13 @@ import styles from "./CreatePostModal.module.css";
 import GeneratePost from "./GeneratePost";
 import { ReactImageGalleryItem } from "react-image-gallery";
 import {
-  IAuthor,
   initialIAuthorizedUser,
-  IPost,
+  initialIFirebaseCreatedAt,
   IPostComment,
   IPostMedia,
 } from "@/shared/types/api.types";
+import APIFirebase from "@/shared/api/Firebase/index";
+import utils from "@/shared/utils";
 
 const CreatePostModal = () => {
   const isCreatePostModalOpen = useModalStore(
@@ -27,13 +28,13 @@ const CreatePostModal = () => {
   const addPost = usePostsStore((state) => state.addPost);
   const authorizedUserData = useUserStore((state) => state.authorizedUserData);
 
-  const uploadImages = useFirebaseStore((state) => state.uploadImages);
-  const uploadedImages = useFirebaseStore((state) => state.uploadedImages);
+  // const uploadedImages = useFirebaseStore((state) => state.uploadedImages);
   const deleteImages = useFirebaseStore((state) => state.deleteImages);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [images, setImages] = useState<ReactImageGalleryItem[]>([]);
   const [postDesc, setPostDesc] = useState("");
+  const [media, setMedia] = useState<IPostMedia[]>([]);
 
   const stepArray = [
     { title: "Создание публикации", name: "addImages" },
@@ -45,7 +46,19 @@ const CreatePostModal = () => {
   const inputOnChange = async (e: React.BaseSyntheticEvent) => {
     const files: File[] = Array.from(e.target.files);
     const readerArray = [];
-    await uploadImages(files, files.length);
+
+    const media_response = await APIFirebase.add.Media(
+      files.map((file) => {
+        const name = utils.makeid(20) + "." + file.name.split(".")[1];
+
+        return {
+          path: "images",
+          file: file,
+          file_name: name,
+        };
+      }),
+    );
+    setMedia(media_response);
     files.forEach(async (file) => {
       if (!file.type.match("image")) {
         return;
@@ -162,25 +175,21 @@ const CreatePostModal = () => {
                             comment_id: 0,
                             author: authorizedUserData,
                             text: postDesc,
-                            timestamp: 0,
+                            created_at: initialIFirebaseCreatedAt,
                             uid: "",
                           },
                         ] as IPostComment[])
                       : [];
-                  const post: IPost = {
+                  const post = {
                     post_weight: 0,
-                    media: [uploadedImages] as unknown as IPostMedia[],
+                    media,
                     likes: { data: [], length: 0 },
                     created_at: { seconds: 0, nanoseconds: Date.now() },
                     comments: { data: comments, length: comments.length },
-                    author: {
-                      uid: authorizedUserData.uid,
-                      nickname: authorizedUserData.nickname,
-                      avatar: { url: authorizedUserData.avatar.url },
-                    } as IAuthor,
+                    author: authorizedUserData.uid,
                   };
                   setCurrentStepIndex(2);
-                  await addPost(post);
+                  addPost({ post: post, user: authorizedUserData });
                   setCurrentStepIndex(3);
                 }
               }}

@@ -131,9 +131,7 @@ const EditProfilePage = () => {
             aria-disabled={isButtonDisabled}
           >
             <div className={styles.edit_profile_page__item}>
-              <aside className={styles.edit_profile_page__item_title}>
-                Имя
-              </aside>
+              <p className={styles.edit_profile_page__item_title}>Имя</p>
               <div className={styles.edit_profile_page__item__input_box}>
                 <input
                   className={styles.edit_profile_page__item__input}
@@ -148,9 +146,9 @@ const EditProfilePage = () => {
               </div>
             </div>
             <div className={styles.edit_profile_page__item}>
-              <aside className={styles.edit_profile_page__item_title}>
+              <p className={styles.edit_profile_page__item_title}>
                 Имя пользователя
-              </aside>
+              </p>
               <div className={styles.edit_profile_page__item__input_box}>
                 <input
                   className={styles.edit_profile_page__item__input}
@@ -164,9 +162,7 @@ const EditProfilePage = () => {
               </div>
             </div>
             <div className={styles.edit_profile_page__item}>
-              <aside className={styles.edit_profile_page__item_title}>
-                О себе
-              </aside>
+              <p className={styles.edit_profile_page__item_title}>О себе</p>
               <div className={styles.edit_profile_page__item__input_box}>
                 <textarea
                   className={styles.edit_profile_page__item__input}

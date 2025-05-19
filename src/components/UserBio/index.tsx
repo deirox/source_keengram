@@ -47,7 +47,7 @@ const UserBio: FC<IFCUserBio> = ({
             src={userData?.avatar.url}
             onError={({ currentTarget }) => {
               currentTarget.onerror = null; // prevents looping
-              currentTarget.src = "/keengram/img/EmptyAvatar.jpg";
+              currentTarget.src = "keengram/img/EmptyAvatar.jpg";
             }}
             alt={`${userData?.nickname} avatar`}
           />

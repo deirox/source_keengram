@@ -13,7 +13,7 @@ interface IMusicStore {
   isGetAudiosError: boolean;
   isGetAudiosLoading: boolean;
   isAudioUploading: boolean;
-  isAudioUploadingError: any;
+  isAudioUploadingError: unknown;
   getAudios: (userUid: string) => void;
   uploadAudio: (
     files: ArrayBuffer,
@@ -85,7 +85,7 @@ export const useMusicStore = create<IMusicStore>((set, get) => ({
     }));
 
     const uid = utils.makeid(20);
-    const path = `/KEENGRAM/Music/${uid}.mp3`;
+    const path = `keengram/Music/${uid}.mp3`;
     const res = await APIYandexDisk.add.File(path);
 
     const authorizedUserData = useUserStore.getState().authorizedUserData;

@@ -2,7 +2,6 @@ import React, { useRef, useState } from "react";
 import { useUserStore } from "@/shared/store/useUserStore";
 import { useMusicStore } from "@/shared/store/useMusicStore";
 import styles from "./MusicPage.module.css";
-import { HiUpload } from "react-icons/hi";
 import AddAudioModal from "@/components/AddAudioModal";
 import AudioCard from "./AudioCard";
 
@@ -28,14 +27,14 @@ const MusicPage = () => {
 
   return (
     <div className={styles.music_page__container}>
-      <div className={styles.music_page__header}>
+      {/* <div className={styles.music_page__header}>
         <button>Главная</button>
         <HiUpload
           className={styles.music_page__updload_btn}
           onClick={() => setIsAudioModalOpen(true)}
           size="28"
         />
-      </div>
+      </div> */}
       <div className={styles.music_page__audio_list}>
         {allAudios.length > 0 ? (
           allAudios.map((audio) => {

@@ -27,7 +27,7 @@ const AddAudioModal: FC<IFCAddAudioModal> = ({
   const [audioData, setAudioData] = useState({
     artist: "",
     title: "",
-    img_url: "/keengram/img/NoMusicImg.png",
+    img_url: "keengram/img/NoMusicImg.png",
   });
   const [audioByteArray, setAudioByteArray] = useState(null);
   const uploadAudio = useMusicStore((state) => state.uploadAudio);
@@ -89,7 +89,7 @@ const AddAudioModal: FC<IFCAddAudioModal> = ({
         setAudioData({
           artist: fileTags.artist,
           title: fileTags.title,
-          img_url: "/keengram/img/NoMusicImg.png",
+          img_url: "keengram/img/NoMusicImg.png",
         });
         setAddAudioStepArrayIndex(
           (addAudioStepArrayIndex) => addAudioStepArrayIndex + 1,
