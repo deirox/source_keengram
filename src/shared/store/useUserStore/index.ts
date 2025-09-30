@@ -1,19 +1,14 @@
 import { doc, runTransaction } from "firebase/firestore";
 import { create } from "zustand";
-// import { API_ENDPOINT } from "../../api/Api";
-import { db } from "@/shared/api/firebase";
-// import { useAppStore } from "@/shared/store/useAppStore";
+import { firestore } from "@/shared/api/firebase";
 import APIFirebase from "@/shared/api/Firebase/index";
 import {
+  IAuthor,
   IAuthorFull,
   IAuthorizedUser,
-  initialIAuthor,
   TUserInterfaces,
 } from "@/shared/types/api.types";
 import { IFirebaseGetUserArgs } from "@/shared/api/Firebase/get.types";
-
-// const URL = "/users";
-// const uploadedUsers = useAppStore.getState().uploadedUsers;
 
 export interface IGetUserArgs extends IFirebaseGetUserArgs {
   isAuthorized?: boolean;
@@ -22,7 +17,7 @@ export interface IGetUserArgs extends IFirebaseGetUserArgs {
 interface IUserStore {
   userData: TUserInterfaces | null;
   uploadedUsers: TUserInterfaces[];
-  authorizedUserData: TUserInterfaces | null;
+  authorizedUserData: IAuthorizedUser | null;
   isUserLoading: boolean;
   isAuthorizedUserLoading: boolean;
   isUserError: boolean;
@@ -34,24 +29,26 @@ interface IUserStore {
   setAuthorizedUserLoading: (bool: boolean) => void;
   mutateUserData: ({
     userUid,
-    username,
+    name,
+    surname,
     nickname,
     description,
   }: {
     userUid: string;
-    username: string;
+    name: string;
+    surname: string,
     nickname: string;
     description: string;
   }) => void;
   setAuthorizedUser: (user: TUserInterfaces | null) => void;
-  getUser: (args: IGetUserArgs) => TUserInterfaces | null;
+  getUser: <UserType extends IAuthor>(args: IGetUserArgs) => Promise<UserType | null>;
   setAvatar: (userUid: string, newAvatarUrl: string) => void;
 }
 
 export const useUserStore = create<IUserStore>((set, get) => ({
-  userData: initialIAuthor,
+  userData: null,
   uploadedUsers: [],
-  authorizedUserData: initialIAuthor,
+  authorizedUserData: null,
   isUserLoading: true,
   isAuthorizedUserLoading: true,
   isUserError: false,
@@ -65,21 +62,22 @@ export const useUserStore = create<IUserStore>((set, get) => ({
   setAuthorizedUserLoading: (bool) => {
     set({ isAuthorizedUserLoading: bool });
   },
-  mutateUserData: async ({ userUid, username, nickname, description }) => {
+  mutateUserData: async ({ userUid, name, surname, nickname, description }) => {
     set({
       isMutateUserLoading: true,
       isMutateUserError: false,
     });
 
     try {
-      const userRef = doc(db, "users", userUid);
-      await runTransaction(db, async (transaction) => {
+      const userRef = doc(firestore, "users", userUid);
+      await runTransaction(firestore, async (transaction) => {
         const userDoc = await transaction.get(userRef);
         if (!userDoc.exists()) {
           throw "Document does not exist!";
         }
         transaction.update(userRef, {
-          username: username,
+          name: name,
+          surname: surname,
           nickname: nickname,
           description: description,
         });
@@ -88,7 +86,8 @@ export const useUserStore = create<IUserStore>((set, get) => ({
         isMutateUserLoading: false,
         authorizedUserData: {
           ...state.authorizedUserData,
-          username,
+          name,
+          surname,
           nickname,
           description,
         } as unknown as IAuthorizedUser,
@@ -131,12 +130,12 @@ export const useUserStore = create<IUserStore>((set, get) => ({
       });
     }
   },
-  getUser: (args) => {
+  getUser: async <UserType extends IAuthor>(args: IGetUserArgs) => {
+
     const { isAuthorized = false } = args;
     const authorizedUserData = get().authorizedUserData;
-
     const uploadedUsers = get().uploadedUsers;
-    //Check state of availability of current user data
+    // Check state of availability of current user data
     const filteredUser = uploadedUsers.filter((user) => {
       switch (args.by) {
         case "uid":
@@ -146,33 +145,44 @@ export const useUserStore = create<IUserStore>((set, get) => ({
       }
     });
     if (filteredUser.length > 0) {
+      set({
+        isUserError: false,
+      });
       //If state not available of current user data
-      return filteredUser[0];
-
-      // const request = getUser({ ...args, return_type, isAuthorized });
+      const filtered_user_type = filteredUser[0].type
+      switch (args.return_type) {
+        case "IAuthorizedUser":
+          if (filtered_user_type === 'IAuthorizedUser') return filteredUser[0] as UserType
+          break
+        case "IAuthorFull":
+          if (filtered_user_type === 'IAuthorFull' || filtered_user_type === 'IAuthorizedUser') return filteredUser[0] as UserType
+          break
+        case "IAuthor":
+          return filteredUser[0] as UserType
+        default:
+          break
+      }
     }
-
     let response: TUserInterfaces | null = null;
     switch (isAuthorized) {
       case true:
         set({
           isAuthorizedUserLoading: true,
         });
-        APIFirebase.get
-          .User({
+        await APIFirebase.get
+          .User<UserType>({
             by: "uid",
             data: args.data,
             return_type: "IAuthorizedUser",
           })
           .then((res) => {
             if (res.status === "success") {
-              response = { ...res.data } as IAuthorizedUser;
+              response = { ...res.data } as TUserInterfaces;
               return set({
                 authorizedUserData: {
                   ...authorizedUserData,
                   ...res.data,
                 } as IAuthorizedUser,
-                userData: res.data,
               });
             }
             if (res.status === "error") {
@@ -190,14 +200,11 @@ export const useUserStore = create<IUserStore>((set, get) => ({
         break;
       case false:
         set({ isUserLoading: true });
-        APIFirebase.get
-          .User(args)
+        await APIFirebase.get
+          .User<UserType>(args)
           .then((res) => {
             if (res.status === "success") {
               response = { ...res.data } as IAuthorFull;
-              return set({
-                userData: res.data,
-              });
             }
             if (res.status === "error") {
               return set({
@@ -215,12 +222,39 @@ export const useUserStore = create<IUserStore>((set, get) => ({
         break;
     }
 
+    if (response !== null) {
+      set((state) => {
+        if (response !== null) {
+          const filteredPrevUploadedUsers = state.uploadedUsers.filter(user => user.uid === response?.uid)
+
+          if (filteredPrevUploadedUsers.length > 0) {
+
+            // const newUploadedUsers
+            return {
+              uploadedUsers: state.uploadedUsers.map(user => {
+                if (user.uid === response?.uid) {
+                  return response
+                }
+                else return user
+              }) as TUserInterfaces[],
+            }
+          } else {
+            return {
+              uploadedUsers: [...state.uploadedUsers, response]
+            }
+          }
+        } else {
+          return ({})
+        }
+      });
+    }
+
     return response;
   },
   setAvatar: async (userUid, newAvatarUrl) => {
     try {
-      const userRef = doc(db, "users", userUid);
-      await runTransaction(db, async (transaction) => {
+      const userRef = doc(firestore, "users", userUid);
+      await runTransaction(firestore, async (transaction) => {
         const userDoc = await transaction.get(userRef);
         if (!userDoc.exists()) {
           throw "Document does not exist!";

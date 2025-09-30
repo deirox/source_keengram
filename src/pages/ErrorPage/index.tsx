@@ -1,9 +1,17 @@
 import ErrorComponent from "@/components/ErrorComponent";
+import { FC } from "react";
+import { useRouteError } from "react-router-dom";
 
-const ErrorPage = () => {
+interface IFCErrorPage {
+  text?: string
+}
+
+const ErrorPage: FC<IFCErrorPage> = ({ text }) => {
+  const error = useRouteError();
+
   return (
     <div>
-      <ErrorComponent />
+      <ErrorComponent text={text + " " + error} />
     </div>
   );
 };

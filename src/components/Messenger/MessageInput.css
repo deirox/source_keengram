@@ -1,0 +1,124 @@
+.message-input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 15px;
+  background: #1a1a1a;
+  border-top: 1px solid #333;
+}
+
+.message-input-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.action-button:hover {
+  background: #333;
+  color: #fff;
+}
+
+.message-input-main {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex: 1;
+  background: #2a2a2a;
+  border-radius: 20px;
+  padding: 8px 15px;
+  border: 1px solid #444;
+}
+
+.message-textarea {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  max-height: 100px;
+  min-height: 20px;
+  line-height: 1.4;
+}
+
+.message-textarea::placeholder {
+  color: #888;
+}
+
+.send-button {
+  background: #0095f6;
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  transform: rotate(90deg);
+}
+
+.send-button:hover:not(:disabled) {
+  background: #0081d6;
+  transform: rotate(90deg) scale(1.1);
+}
+
+.send-button:disabled {
+  background: #444;
+  cursor: not-allowed;
+  transform: rotate(90deg);
+}
+
+/* Индикатор печати */
+.typing-indicator {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .message-input-container {
+    padding: 16px;
+    gap: 6px;
+    margin-bottom: 3.2rem;
+  }
+  
+  .action-button,
+  .send-button {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  
+  .message-textarea {
+    min-height: 40px;
+    font-size: 16px; /* Предотвращает зум на iOS */
+  }
+} 

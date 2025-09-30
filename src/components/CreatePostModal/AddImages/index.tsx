@@ -11,18 +11,14 @@ interface IAddImages {
 }
 
 const AddImages = ({
-  currentStep = { title: "", name: "" },
-  thisStep = { title: "", name: "" },
   active = false,
   inputOnChange = () => {},
 }: IAddImages) => {
-  console.log(currentStep, thisStep);
   const filePicker = useRef<HTMLInputElement>(null);
   // console.log(thisStep.name === currentStep.name);
   const handleClick = () => {
     if (filePicker.current) {
       filePicker.current.click();
-      // addPost();
     }
   };
 

@@ -1,13 +1,13 @@
 import ReactImageGallery, { ReactImageGalleryItem } from "react-image-gallery";
 import styles from "./GeneratePost.module.css";
-import { TUserInterfaces } from "@/shared/types/api.types";
+import { IAuthorizedUser } from "@/shared/types/api.types";
 
 interface IGeneratePost {
   active: boolean;
   images: ReactImageGalleryItem[];
   postDesc: string;
   setPostDesc: (value: string) => void;
-  authorizedUserData: TUserInterfaces;
+  authorizedUserData: IAuthorizedUser;
 }
 
 const GeneratePost = ({

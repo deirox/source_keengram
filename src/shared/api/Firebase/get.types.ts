@@ -6,15 +6,36 @@ import {
   TUserTypes,
 } from "@/shared/types/api.types";
 
+export interface IFirebaseGetUsersArgs {
+  count: number
+  settings?: {
+    include_authorized?: boolean
+  }
+  return_type?: TUserTypes
+}
+
+export type TFirebaseGetUsers = (
+  args: IFirebaseGetUsersArgs,
+) => Promise<IAPIMethodResponse<TUserInterfaces[]>>;
+
 export interface IFirebaseGetUserArgs {
   by: "uid" | "nickname";
   data: string;
   return_type?: TUserTypes;
 }
 
-export type TFirebaseGetUser = (
+export type TFirebaseGetUser = <UserType>(
   args: IFirebaseGetUserArgs,
-) => Promise<IAPIMethodResponse<TUserInterfaces>>;
+) => Promise<IAPIMethodResponse<UserType>>;
+
+
+export interface IFirebaseGetUserMetaInfoArgs<T = TUserInterfaces> {
+  return_type: TUserTypes;
+  user: T | null
+}
+export type TFirebaseGetUserMetaInfo = <T>(
+  args: IFirebaseGetUserMetaInfoArgs<T>,
+) => Promise<T | null>;
 
 export interface IFirebaseGetCommentsArgs {
   post_uid: string;

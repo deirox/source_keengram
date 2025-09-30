@@ -7,7 +7,8 @@ import styles from "./EditProfilePage.module.css";
 import { IAuthorizedUser } from "@/shared/types/api.types";
 
 const EditProfilePage = () => {
-  const [usernameValue, setUsernameValue] = useState("");
+  const [nameValue, setNameValue] = useState("");
+  const [surnameValue, setSurnameValue] = useState("");
   const [nicknameValue, setNicknameValue] = useState("");
   const [descriptionValue, setDescriptionValue] = useState("");
 
@@ -24,7 +25,8 @@ const EditProfilePage = () => {
 
   useEffect(() => {
     if (authorizedUserData) {
-      setUsernameValue(authorizedUserData.name);
+      setNameValue(authorizedUserData.name);
+      setSurnameValue(authorizedUserData.surname);
       setNicknameValue(authorizedUserData.nickname);
       setDescriptionValue(authorizedUserData.description);
     }
@@ -35,7 +37,7 @@ const EditProfilePage = () => {
       return;
     }
     if (authorizedUserData) {
-      if (usernameValue !== authorizedUserData.name) {
+      if (nameValue !== authorizedUserData.name) {
         setIsButtonDisabled(false);
       } else if (nicknameValue !== authorizedUserData.nickname) {
         setIsButtonDisabled(false);
@@ -46,7 +48,8 @@ const EditProfilePage = () => {
       }
     }
   }, [
-    usernameValue,
+    nameValue,
+    surnameValue,
     nicknameValue,
     descriptionValue,
     isMutateUserLoading,
@@ -58,7 +61,8 @@ const EditProfilePage = () => {
     if (authorizedUserData) {
       mutateUserData({
         userUid: authorizedUserData.uid,
-        username: usernameValue,
+        name: nameValue,
+        surname: surnameValue,
         nickname: nicknameValue,
         description: descriptionValue,
       });
@@ -135,8 +139,23 @@ const EditProfilePage = () => {
               <div className={styles.edit_profile_page__item__input_box}>
                 <input
                   className={styles.edit_profile_page__item__input}
-                  value={usernameValue}
-                  onChange={(e) => setUsernameValue(e.target.value)}
+                  value={nameValue}
+                  onChange={(e) => setNameValue(e.target.value)}
+                />
+                <div className={styles.edit_profile_page__item__text}>
+                  Чтобы людям было проще находить ваш аккаунт, используйте имя,
+                  под которым вас знают: ваше имя и фамилию, никнейм или
+                  название компании.
+                </div>
+              </div>
+            </div>
+            <div className={styles.edit_profile_page__item}>
+              <p className={styles.edit_profile_page__item_title}>Фамилия</p>
+              <div className={styles.edit_profile_page__item__input_box}>
+                <input
+                  className={styles.edit_profile_page__item__input}
+                  value={surnameValue}
+                  onChange={(e) => setSurnameValue(e.target.value)}
                 />
                 <div className={styles.edit_profile_page__item__text}>
                   Чтобы людям было проще находить ваш аккаунт, используйте имя,

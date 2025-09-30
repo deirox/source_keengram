@@ -48,7 +48,7 @@
         left: 0;
         position: fixed;
         order: 1;
-        height: max-content;
+        height: 3.2rem;
         flex-direction: row;
         width: 100%;
         border-top: 1px solid rgba(255, 255, 255, 0.15);

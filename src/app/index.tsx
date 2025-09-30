@@ -5,16 +5,21 @@ import MetaNavigation from "@/components/MetaNavigaton";
 import styles from "./app.module.css";
 
 import { useUserStore } from "@/shared/store/useUserStore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import LoaderComponent from "@/components/LoaderComponent";
 import ErrorComponent from "@/components/ErrorComponent";
-import { IAuthor } from "@/shared/types/api.types";
+import { IAuthorizedUser } from "@/shared/types/api.types";
+
+import { Crypto } from "@/shared/utils/cripto";
+
 
 export default function App() {
   const location = useLocation();
-
   const isAuthorizedUserError = useUserStore(
     (state) => state.isAuthorizedUserError,
+  );
+  const authorizedUserData = useUserStore(
+    (state) => state.authorizedUserData,
   );
 
   const isAuthorizedUserLoading = useUserStore(
@@ -32,26 +37,46 @@ export default function App() {
 
   useEffect(() => {
     const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         // User is signed in
-        setAuthorizedUser(user as unknown as IAuthor);
-        // navigate("/");
-        getUser({
+        const u = await getUser<IAuthorizedUser>({
           by: "uid",
           data: user.uid,
           isAuthorized: true,
           return_type: "IAuthorizedUser",
         });
+        setAuthorizedUser({ ...u, ...user, isAuth: true } as unknown as IAuthorizedUser);
+
+
+
+        // console.log('private_key', await Crypto.importPrivateKey(private_key))
+        // const encryptedKeyDoc = await getDoc(doc(firestore, "users", user.uid, 'meta', 'encrypted_keys'))
+
+        // if (!encryptedKeyDoc.data()) {
+        //   console.error("Ключи данного пользователя не найдены!");
+        //   auth.signOut()
+        // }
+        // const { private_key, iv, salt } = encryptedKeyDoc.data() as IEncryptedKeyPBKDF2AESGCM
+        // const privateKey = await Crypto.decryptPrivateKeyWithPassword(private_key, salt, iv, password)
+        // await Crypto.saveEncryptedKeyToDB(privateKey)
+        // setAuthorizedUser({
+        //   ...u,
+        //   uid: user.uid,
+        //   accessToken: user.refreshToken,
+        //   email: user.email,
+        // } as IAuthorizedUser);
+
+
       } else {
-        console.log("Данный пользователь не найден!");
+        console.error("Данный пользователь не найден!");
         setAuthorizedUser(null);
         setAuthorizedUserLoading(false);
         navigate("/accounts/login");
 
         // User is signed out
       }
-      return user;
+      return
     });
 
     if (!effectRun.current) {
@@ -59,9 +84,22 @@ export default function App() {
         effectRun.current = true;
       };
     }
+
+
   }, [navigate, getUser, setAuthorizedUser, setAuthorizedUserLoading]);
 
-  // console.log("isAuthorizedUserLoading", isAuthorizedUserLoading);
+  useEffect(() => {
+    const auth = getAuth();
+    async function chechUserPK() {
+      if (!authorizedUserData) return
+      const k: Record<number, string> = await Crypto.getEncryptedKeyFromDB()
+      if (!authorizedUserData.public_key || !k) {
+        await signOut(auth)
+      }
+    }
+    chechUserPK()
+  }, [authorizedUserData])
+
   return (
     <div
       className={`${styles.app__wrapper}`}
@@ -78,6 +116,7 @@ export default function App() {
       ) : (
         <>
           {!location.pathname.includes("accounts") && <MetaNavigation />}
+
           <Outlet />
         </>
       )}

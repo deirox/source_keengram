@@ -8,7 +8,10 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useUserStore } from "../../shared/store/useUserStore";
-import { IAuthorizedUser } from "@/shared/types/api.types";
+import { IAuthorizedUser, IEncryptedKeyPBKDF2AESGCM } from "@/shared/types/api.types";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { firestore } from "@/shared/api/firebase";
+import { Crypto } from "@/shared/utils/cripto";
 
 const LoginPage = () => {
   const [emailValue, setEmailValue] = useState("");
@@ -36,22 +39,52 @@ const LoginPage = () => {
   const handleLogin = async (email: string, password: string) => {
     try {
       const auth = getAuth();
-      const { user } = await setPersistence(auth, browserLocalPersistence).then(
-        () => {
-          return signInWithEmailAndPassword(auth, email, password);
-        },
-      );
-      setAuthorizedUser({
-        uid: user.uid,
-        accessToken: user.refreshToken,
-        email: user.email,
-      } as IAuthorizedUser);
-      getUser({
+      const { user } = await setPersistence(auth, browserLocalPersistence)
+        .then(
+          () => {
+            return signInWithEmailAndPassword(auth, email, password);
+          },
+        )
+
+      const u = await getUser<Omit<IAuthorizedUser, keyof IEncryptedKeyPBKDF2AESGCM>>({
         by: "uid",
         data: user.uid,
         isAuthorized: true,
         return_type: "IAuthorizedUser",
       });
+
+      if (!u) return
+
+      try {
+        const encryptedKeyDoc = await getDoc(doc(firestore, "users", user.uid, 'meta', 'encrypted_keys'))
+        const { private_key, iv, salt } = encryptedKeyDoc.data() as IEncryptedKeyPBKDF2AESGCM
+        const privateKey = await Crypto.decryptPrivateKeyWithPassword(private_key, salt, iv, password)
+        await Crypto.saveEncryptedKeyToDB({ private_key: privateKey })
+        setAuthorizedUser({
+          ...u,
+          uid: user.uid,
+          accessToken: user.refreshToken,
+          email: user.email,
+        } as IAuthorizedUser);
+      } catch (error) {
+        const { publicKey, privateKey } = await Crypto.generateKeyPair()
+        await Crypto.saveEncryptedKeyToDB({ private_key: privateKey })
+        const { encryptedKey, salt, iv } = await Crypto.encryptPrivateKeyWithPassword(privateKey, password)
+        await updateDoc(doc(firestore, "users", user.uid), { public_key: publicKey })
+        await setDoc(doc(firestore, "users", user.uid, 'meta', 'encryted_keys'), {
+          private_key: encryptedKey,
+          salt,
+          iv
+        });
+        setAuthorizedUser({
+          ...u,
+          uid: user.uid,
+          accessToken: user.refreshToken,
+          email: user.email,
+          public_key: publicKey,
+        } as IAuthorizedUser);
+      }
+
       navigate("/");
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -60,7 +93,7 @@ const LoginPage = () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       const errorMessage = error.message;
-      console.log("errorCode: ", errorCode, "errorMessage: ", errorMessage);
+      console.error("errorCode: ", errorCode, "errorMessage: ", errorMessage);
     }
   };
   const onFormSubmit = (e: BaseSyntheticEvent) => {

@@ -1,34 +1,61 @@
 import cn from "classnames";
-import { BaseSyntheticEvent, FC, useState } from "react";
+import { BaseSyntheticEvent, FC, useEffect, useRef, useState } from "react";
 import { BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
-import { FaRegComment } from "react-icons/fa";
-import ReactImageGallery from "react-image-gallery";
-import { Link } from "react-router-dom";
+import ReactImageGallery, { ReactImageGalleryItem } from "react-image-gallery";
 import { usePostsStore } from "@/shared/store/usePostsStore";
 import { useUserStore } from "@/shared/store/useUserStore";
 import ModalBody from "@/components/ModalBody";
-import styles from "./PostCardModal.module.css";
+import styles from "./PostModal.module.css";
 import { initialIBigDataWithLength, IPost } from "@/shared/types/api.types";
 import MiniComment from "@/components/MiniComment";
+import FCPostHeader from "@/entities/PostTopBar";
 
-interface IFCPostCardModal extends IPost {
+interface IFCPostModal {
+  post: IPost,
   isOpen: boolean;
   onClose: () => void;
 }
 
-const PostCardModal: FC<IFCPostCardModal> = ({
-  uid = "",
-  media = [],
-  created_at = 0,
-  likes = initialIBigDataWithLength,
-  comments = initialIBigDataWithLength,
-  author,
+const PostModal: FC<IFCPostModal> = ({
+  post,
   isOpen = false,
-  onClose = () => {},
+  onClose = () => { },
 }) => {
-  const formatedImages = media.map((m) => {
-    return { ...m, original: m.url, thumbnail: m.url };
-  });
+  const getComments = usePostsStore(state => state.getComments)
+  const { uid = "",
+    media = [],
+    created_at = 0,
+    likes = initialIBigDataWithLength,
+    comments = initialIBigDataWithLength,
+  } = post
+
+  useEffect(() => {
+    if (isOpen === true) {
+      const checkcomments = async () => {
+        if (comments.data.length < 10 && comments.data.length < comments.length) {
+          const getcomments = await getComments(uid)
+          usePostsStore.setState({
+            posts:
+              usePostsStore.getState().posts.map(_post => {
+                if (_post.uid === uid) {
+                  return {
+                    ..._post,
+                    comments: { ..._post.comments, data: getcomments.data }
+                  }
+                } return _post
+              })
+          })
+        }
+      }
+      checkcomments()
+    }
+
+  }, [isOpen])
+
+  const formatedImages = useRef(media.map((m) => {
+    return { ...m, original: m.url[m.url.length - 1], thumbnail: m.url[m.url.length - 1] } as ReactImageGalleryItem;
+  }));
+
   const [commentValue, setCommentValue] = useState("");
   const mutateLike = usePostsStore((state) => state.mutateLike);
   const addComment = usePostsStore((state) => state.addComment);
@@ -37,7 +64,7 @@ const PostCardModal: FC<IFCPostCardModal> = ({
   );
   const authorizedUserData = useUserStore((state) => state.authorizedUserData);
   const onLike = () => {
-    console.log(created_at, comments);
+    console.log(created_at);
     if (authorizedUserData) {
       mutateLike({
         like_uid: likes.data.length > 0 ? likes.data[0].uid : "",
@@ -50,7 +77,7 @@ const PostCardModal: FC<IFCPostCardModal> = ({
   const onAddComment = async (e: BaseSyntheticEvent) => {
     e.preventDefault();
     if (authorizedUserData && commentValue.length > 0) {
-      addComment(uid, authorizedUserData.uid, commentValue, false);
+      addComment({ post_uid: uid, author: authorizedUserData, comment_id: post.comments.length, text: commentValue });
       setCommentValue("");
     }
   };
@@ -58,47 +85,30 @@ const PostCardModal: FC<IFCPostCardModal> = ({
     <ModalBody
       isModalOpen={isOpen}
       onClose={onClose}
-      modalClassname={styles.post_card_modal}
+      modalClassname={styles.post_modal}
     >
-      <div className={styles.post_card_modal__box}>
-        <div className={styles.post_card_modal__images}>
+      <div className={styles.post_modal__box}>
+        <div className={styles.post_modal__images}>
           <ReactImageGallery
             lazyLoad
-            items={formatedImages}
-            showBullets={formatedImages.length > 1}
+            items={formatedImages.current}
+            showBullets={formatedImages.current.length > 1}
             showThumbnails={false}
             showPlayButton={false}
             infinite={false}
             showFullscreenButton={false}
           />
         </div>
-
-        <div className={styles.post_card_modal__actions}>
-          {typeof author === "object" && (
-            <div className={styles.post_card_modal__top}>
-              <img
-                className={styles.post_card_modal__author_avatar}
-                src={author.avatar.url}
-                alt={author.avatar.url}
-              />
-
-              <Link
-                className={styles.post_card_modal__author_nickname}
-                to={`/${author.nickname}`}
-              >
-                {author.nickname}
-              </Link>
-            </div>
-          )}
-
-          <div className={styles.post_card_modal__comments}>
+        <div className={styles.post_modal__actions}>
+          <FCPostHeader authorizedUserData={authorizedUserData} post={post} onConfirm={onClose} />
+          <div className={styles.post_modal__comments}>
             {comments.length > 0 ? (
-              comments.data.map(({ author, text }, index) => {
+              comments.data.map(({ uid, author, text }) => {
                 if (typeof author === "object") {
                   return (
                     <MiniComment
-                      key={index}
-                      classname={styles.post_card_modal__comment}
+                      key={uid}
+                      classname={styles.post_modal__comment}
                       nickname={author.nickname}
                       text={text}
                     />
@@ -107,81 +117,78 @@ const PostCardModal: FC<IFCPostCardModal> = ({
                 return <></>;
               })
             ) : (
-              <div className={styles.post_card_modal__comments_is_null}>
+              <div className={styles.post_modal__comments_is_null}>
                 <h3>Нет комментариев.</h3>
                 <p>Начните переписку.</p>
               </div>
             )}
           </div>
-          <div className={styles.post_card_modal__inner_images}>
+          <div className={styles.post_modal__inner_images}>
             <ReactImageGallery
-              items={formatedImages}
-              showBullets={formatedImages.length > 1}
+              items={formatedImages.current}
+              showBullets={formatedImages.current.length > 1}
               showThumbnails={false}
               showPlayButton={false}
               infinite={false}
               showFullscreenButton={false}
             />
           </div>
-          <div className={styles.post_card_modal__bottom}>
-            <div className={styles.post_card_modal__buttons}>
+          <div className={styles.post_modal__bottom}>
+            <div className={styles.post_modal__buttons}>
               <button
                 className={cn(
-                  styles.post_card_modal__button,
+                  styles.post_modal__button,
                   authorizedUserData
                     ? likes.data.filter(
-                        (like) => like.user_uid === authorizedUserData.uid,
-                      ).length > 0
-                      ? styles.post_card_modal__button_like
+                      (like) => like.user_uid === authorizedUserData.uid,
+                    ).length > 0
+                      ? styles.post_modal__button_like
                       : ""
                     : "",
                 )}
                 onClick={onLike}
               >
                 {authorizedUserData &&
-                likes.data.filter(
-                  (like) => like.user_uid === authorizedUserData.uid,
-                ).length > 0 ? (
+                  likes.data.filter(
+                    (like) => like.user_uid === authorizedUserData.uid,
+                  ).length > 0 ? (
                   <BsSuitHeartFill color="rgb(255, 48, 64)" />
                 ) : (
                   <BsSuitHeart color="#fff" />
                 )}
               </button>
-              <button className={styles.post_card_modal__button}>
-                <FaRegComment color="#fff" />
-              </button>
             </div>
 
-            <p className={styles.post_card_modal__like_string}>
-              {likes.data.length > 0
-                ? likes.data.length > 1
-                  ? `${likes.data.length} отметок "Нравиться"`
-                  : `${likes.data.length} отметка "Нравиться"`
+            <p className={styles.post_modal__like_string}>
+              {likes.length > 0
+                ? likes.length > 1
+                  ? `${likes.length} отметок "Нравиться"`
+                  : `${likes.length} отметка "Нравиться"`
                 : `Поставьте первую отметку "Нравиться"!`}
             </p>
             <form
-              className={styles.post_card_modal__form}
+              className={styles.post_modal__form}
               onSubmit={(e) => {
                 onAddComment(e);
               }}
               aria-disabled={isMutatePostsLoading}
             >
               <textarea
-                className={styles.post_card_modal__form_textarea}
+                className={styles.post_modal__form_textarea}
                 placeholder="Добавьте комментарий..."
                 maxLength={200}
                 value={commentValue}
                 onChange={(e) => setCommentValue(e.target.value)}
               />
-              <button className={styles.post_card_modal__form_button}>
+              <button className={styles.post_modal__form_button}>
                 Опубликовать
               </button>
             </form>
           </div>
         </div>
       </div>
-    </ModalBody>
+    </ModalBody >
   );
 };
 
-export default PostCardModal;
+export default PostModal;

@@ -1,0 +1,11 @@
+.messenger-page {
+  height: 100vh;
+  overflow: hidden;
+  background: #000000;
+  color: #ffffff;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .messenger-page {}
+}

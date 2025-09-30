@@ -1,37 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 import styles from "./MainPage.module.css";
 
 import { usePostsStore } from "@/shared/store/usePostsStore";
-import PostCard from "@/components/PostCard";
+import PostCard from "@/components/Post";
 import ErrorComponent from "@/components/ErrorComponent";
 import LoaderComponent from "@/components/LoaderComponent";
 
 const MainPage = () => {
   const effectRun = useRef(false);
 
-  const posts = usePostsStore((state) => state.posts);
+  const getPosts = usePostsStore((state) => state.getPosts);
   const isPostsLoading = usePostsStore((state) => state.isPostsLoading);
   const isPostsError = usePostsStore((state) => state.isPostsError);
-  const getPosts = usePostsStore((state) => state.getPosts);
-  const getMorePosts = usePostsStore((state) => state.getMorePosts);
   const totalCount = usePostsStore((state) => state.totalCount);
+  const posts = usePostsStore((state) => state.posts);
 
-  const [page] = useState(1);
+  const page = useRef(1);
+  const hasMore = useRef(posts.length < totalCount);
 
   useEffect(() => {
     if (!effectRun.current) {
-      getPosts(page, 5);
+      getPosts(page.current, 5);
       return () => {
         effectRun.current = true;
       };
     }
   }, []);
-  // console.log("posts: ", posts);
 
   return (
     <>
-      {posts.length > 0 && isPostsLoading ? (
+      {totalCount === 0 && posts.length === 0 && isPostsLoading ? (
         isPostsError ? (
           <ErrorComponent />
         ) : (
@@ -39,7 +38,7 @@ const MainPage = () => {
         )
       ) : (
         <div className={styles.main_page__posts}>
-          {posts.length === 0 ? (
+          {totalCount >= 0 && posts.length === 0 && !isPostsLoading ? (
             <p
               style={{
                 margin: "1rem 0",
@@ -51,18 +50,23 @@ const MainPage = () => {
             </p>
           ) : (
             <>
+              {isPostsLoading &&
+                <LoaderComponent text="Идёт загрузка постов! Подождите!" />
+              }
               <InfiniteScroll
-                hasMore={posts.length < totalCount}
-                loadMore={() => {
-                  // setPage(page + 1);
-                  getMorePosts(page, 5);
+                initialLoad={false}
+                hasMore={hasMore.current}
+                pageStart={page.current}
+                loadMore={(_page) => {
+                  if (totalCount === 0 && posts.length === 0) return
+                  getPosts(_page)
                 }}
               >
-                {posts.map((post, index) => {
-                  return <PostCard key={index} {...post} />;
+                {posts.map((post) => {
+                  return <PostCard key={post.uid} post={post} />;
                 })}
               </InfiniteScroll>
-              {posts.length > totalCount && (
+              {posts.length >= totalCount && (
                 <p
                   style={{
                     margin: "1rem 0 3rem",

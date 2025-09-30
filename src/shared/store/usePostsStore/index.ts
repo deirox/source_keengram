@@ -1,10 +1,9 @@
-import axios from "axios";
 import { create } from "zustand";
 import utils from "@/shared/utils";
-import { API_ENDPOINT } from "@/shared/api/api";
-import { db } from "@/shared/api/firebase";
+import { firestore } from "@/shared/api/firebase";
 import {
   collection,
+  getCountFromServer,
   getDocs,
   limit,
   orderBy,
@@ -13,7 +12,8 @@ import {
   where,
 } from "firebase/firestore";
 import {
-  IAuthor,
+  IAPIMethodResponse,
+  IAuthorizedUser,
   IBigDataWithLength,
   initialIPostLike,
   IPost,
@@ -23,7 +23,7 @@ import {
 import { useUserStore } from "../useUserStore";
 import APIFirebase from "@/shared/api/Firebase/index";
 
-const URL = "/posts";
+// const URL = "/posts";
 
 interface IPostStore {
   posts: IPost[];
@@ -45,28 +45,29 @@ interface IPostStore {
     action: "add" | "remove";
     isUserPosts?: boolean;
   }) => void;
-  addComment: (
+  addComment: ({ }: {
+    author: IAuthorizedUser,
     post_uid: string,
-    author_uid: string,
+    comment_id: number,
     text: string,
     isUserPosts?: boolean,
-  ) => void;
+  }) => void;
   getUserPosts: (userUid: string, limitCount?: number) => void;
   getPosts: (page?: number, limitCount?: number) => void;
-  getMorePosts: (page?: number, limitCount?: number) => void;
   getComments: (
     post_uid: string,
     page?: number,
     limit_count?: number,
   ) => Promise<IBigDataWithLength<IPostComment[]>>;
   sortPosts: (posts: IPost[]) => void;
-  addPost: ({
-    post,
-    user,
-  }: {
-    post: IPost;
+  addPost: ({ }: {
+    post: Omit<IPost, "uid">;
     user: TUserInterfaces;
-  }) => Promise<IPost>;
+  }) => Promise<IAPIMethodResponse<IPost>>;
+  deletePost: ({ }: {
+    post: IPost;
+    user_uid: string;
+  }) => Promise<boolean>;
 }
 
 export const usePostsStore = create<IPostStore>((set, get) => ({
@@ -81,28 +82,60 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
       post_weight: utils.calculatePostWeight(post),
     };
 
-    console.log(weightedPost);
     const post_response = await APIFirebase.add.Post({ post: weightedPost });
-    const weightedPostLocal = { ...post_response, author: user.uid };
-    set((state) => ({
-      posts: [...state.posts, weightedPostLocal],
-      userPosts: [...state.posts, weightedPostLocal],
-    }));
 
-    return weightedPostLocal;
+    if (post_response.status === 'success' && post_response.data !== null) {
+      post_response.data.author = user
+      if (post_response.data.comments.data.length > 0) {
+        post_response.data.comments.data[0].author = user
+      }
+
+      set((state) => ({
+        posts: [...state.posts, post_response.data as IPost],
+        userPosts: [...state.posts, post_response.data as IPost],
+      }));
+    }
+
+    return post_response;
   },
-  getPosts: async (page = 0, limitCount = 5) => {
-    set({
-      posts: [],
-      isPostsLoading: true,
-      isPostsError: false,
+
+  deletePost: async ({ post, user_uid }) => {
+    if (typeof post.author === 'string') {
+      if (post.author !== user_uid) return false
+    } else {
+      if (post.author.uid !== user_uid) return false
+    }
+
+    const response = await APIFirebase.remove.Post({ post })
+    if (!response.data) return false
+    if (response.status === 'success') {
+      set((state) => ({ posts: state.posts.filter(_post => _post.uid !== post.uid) }))
+    }
+    return response.data
+  },
+
+  getPosts: async (page = 1, limitCount = 5) => {
+    set(() => {
+      if (page <= 1) return {
+        posts: [],
+        isPostsLoading: true,
+        isPostsError: false,
+      }
+      return {
+        isPostsLoading: true,
+        isPostsError: false,
+      }
     });
-    console.warn("page", page);
+
     try {
       const getUser = useUserStore.getState().getUser;
-      // const sortPosts = get().sortPosts;
-      // const authorizedUserData = get().authorizedUserData;
-      const postsRef = collection(db, "posts");
+      const postsRef = collection(firestore, "posts");
+
+      if (page === 1) {
+        const snapshot = await getCountFromServer(postsRef);
+        set({ totalCount: snapshot.data().count })
+      } else if (page > 1 && page * limitCount > get().totalCount) return
+
       let q;
 
       const postsNow = get().posts;
@@ -126,11 +159,14 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
         // doc.data() is never undefined for query doc snapshots
         const post = document.data();
         const authorUid = post.author;
-        const user = getUser({ by: "uid", data: authorUid });
+        const user = await getUser({
+          by: "uid",
+          data: authorUid,
+        });
         if (user) {
           const comments = await usePostsStore
             .getState()
-            .getComments(document.id);
+            .getComments(document.id, 0, 1);
           const like = await APIFirebase.get.Like({
             post_uid: document.id,
             user_uid: authorizedUser.uid,
@@ -139,7 +175,7 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
             ...post,
             uid: document.id,
             author: user,
-            comments,
+            comments: { data: comments.data, length: post.comments.length },
             likes: {
               data:
                 like.data && like.data.post_uid && like.data.post_uid.length > 0
@@ -159,38 +195,26 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
       set({ posts: [], isPostsLoading: true, isPostsError: error });
     }
   },
-  getMorePosts: async (page, limitCount) => {
-    await axios
-      .get(`${API_ENDPOINT}${URL}?_page=${page}&_limit=${limitCount}`)
-      .then((response) => {
-        const responseData = [...response.data];
-        set((state) => ({
-          posts: [...state.posts, ...responseData],
-          totalCount: response.headers["x-total-count"],
-          isPostsLoading: false,
-        }));
-      })
-      .catch((error) => {
-        console.warn("Произошла ошибка при получении постов!");
-        set({ isPostsError: error });
-      });
-  },
+
 
   getUserPosts: async (userUid, limitCount = 5) => {
-    set((state) => ({
-      posts: state.posts.filter((post) => {
-        if (post.author === userUid) {
-          return post.author === userUid;
-        } else if (typeof post.author !== "string") {
-          return post.author.uid === userUid;
-        }
-      }),
-      isPostsLoading: true,
-      isPostsError: false,
-    }));
+    set((state) => {
+      console.log('state', state.posts)
+      return {
+        posts: state.posts.filter((post) => {
+          if (typeof post.author === "string" && post.author === userUid) {
+            return post.author === userUid;
+          } else if (typeof post.author !== "string") {
+            return post.author.uid === userUid;
+          }
+        }),
+        isPostsLoading: true,
+        isPostsError: false,
+      }
+    });
     try {
       const getUser = useUserStore.getState().getUser;
-      const postsRef = collection(db, "posts");
+      const postsRef = collection(firestore, "posts");
       const q = query(
         postsRef,
         where("author", "==", userUid),
@@ -198,35 +222,32 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
         limit(limitCount),
       );
       // console.log(q);
+      if (userUid.length === 0) return
       if (userUid.length > 0) {
         const querySnapshot = await getDocs(q);
-        if (
-          querySnapshot.forEach((doc) => {
-            return doc;
-          }) === undefined
-        ) {
-          set({
-            posts: [],
-            isPostsLoading: true,
-            isPostsError: false,
-          });
-        }
+
+        set(({
+          isPostsLoading: false,
+          isPostsError: false,
+        }));
         querySnapshot.forEach(async (document) => {
           // doc.data() is never undefined for query doc snapshots
           const post = document.data();
           const authorUid = post.author;
+          const user = await getUser({ by: "uid", data: authorUid });
 
-          const user = getUser({ by: "uid", data: authorUid });
           if (user) {
-            // console.log("Document data:", docSnap.data());
+            const filter = get().posts.filter(post => post.uid === document.id)
+            if (filter.length > 0) {
+              return
+            }
 
+            const newPost = { ...post, uid: document.id, author: user } as IPost;
             set((state) => ({
               posts: [
                 ...state.posts,
-                { ...post, uid: document.id, author: user },
+                newPost
               ] as IPost[],
-              isPostsLoading: false,
-              isPostsError: false,
             }));
           } else {
             console.error("Такого пользователя не существует!");
@@ -283,7 +304,10 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
                   (like) => String(like.user_uid) !== String(userUid),
                 ),
               ],
-              length: oldPost.likes.length,
+              length:
+                action === "add"
+                  ? oldPost.likes.length + 1
+                  : oldPost.likes.length - 1,
             },
           };
         } else {
@@ -291,7 +315,10 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
             ...oldPost,
             likes: {
               data: [...oldPost.likes.data, like],
-              length: oldPost.likes.length,
+              length:
+                action === "add"
+                  ? oldPost.likes.length + 1
+                  : oldPost.likes.length - 1,
             },
           };
         }
@@ -318,7 +345,7 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
       });
     }
   },
-  addComment: async (post_uid, author_uid, text) => {
+  addComment: async ({ author, post_uid, comment_id, text }) => {
     set({
       isMutatePostsLoading: true,
     });
@@ -326,44 +353,34 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
       set({
         isMutatePostsLoading: true,
       });
-      const posts = get().posts;
-
-      const oldPost = posts.find((post) => post.uid === post_uid);
-      if (!oldPost) return;
 
       const newComment = await APIFirebase.add.Comment({
         comment: {
           post_uid: post_uid,
-          comment_id: oldPost.comments.length,
-          author: author_uid,
+          comment_id: comment_id,
+          author: author.uid,
           text,
         },
       });
 
-      const newCommentsData = [...oldPost.comments.data, newComment];
-      const newPost = {
-        ...oldPost,
-        comments: {
-          ...oldPost.comments,
-          data: newCommentsData,
-          length: newCommentsData.length,
-        },
-      } as IPost;
-
-      const newPostWeighted = {
-        ...newPost,
-        post_weight: utils.calculatePostWeight(newPost),
-      };
-
-      const newPosts = posts.map((post) => {
-        if (post.uid === post_uid) {
-          return newPostWeighted;
-        } else return post;
-      });
-
-      set({
-        isMutatePostsLoading: false,
-        posts: [...newPosts],
+      set((state) => {
+        const post = state.posts.find((post) => post.uid === post_uid);
+        if (!post) return { isMutatePostsLoading: false }
+        newComment.author = author
+        post.comments.data.push(newComment)
+        post.comments = {
+          data: post.comments.data,
+          length: post.comments.data.length,
+        }
+        post.post_weight = utils.calculatePostWeight(post)
+        return {
+          isMutatePostsLoading: false,
+          posts: state.posts.map((_post) => {
+            if (_post.uid === post_uid) {
+              return post;
+            } else return _post;
+          }),
+        }
       });
     } catch (error) {
       set({
@@ -371,21 +388,25 @@ export const usePostsStore = create<IPostStore>((set, get) => ({
       });
     }
   },
-  getComments: async (post_uid) => {
+  getComments: async (post_uid, page = 0, limit_count = 10) => {
     const comments_response = await APIFirebase.get.Comment({
       post_uid,
+      page,
+      limit_count
     });
-    if (comments_response.data === null) return { data: [], length: 0 };
-
+    if (comments_response.status !== "success" || comments_response.data === null) return { data: [], length: 0 };
     const response = await Promise.all(
       comments_response.data.map(async (comment) => {
-        const author = useUserStore.getState().getUser({
+        if (typeof comment.author !== 'string') return comment
+
+        const _author = await useUserStore.getState().getUser({
           by: "uid",
           data: comment.author as string,
         });
+
         return {
           ...comment,
-          author: author as IAuthor,
+          author: _author ? _author : comment.author,
         };
       }),
     );

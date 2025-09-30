@@ -1,6 +1,6 @@
 import { collection, getDocs } from "firebase/firestore";
 import { create } from "zustand";
-import { db } from "@/shared/api/firebase";
+import { firestore } from "@/shared/api/firebase";
 import utils from "../../utils";
 import { useUserStore } from "../useUserStore";
 import APIYandexDisk from "@/shared/api/YandexDisk";
@@ -33,7 +33,7 @@ export const useMusicStore = create<IMusicStore>((set, get) => ({
   isAudioUploading: true,
   isAudioUploadingError: false,
   getAudios: async () => {
-    const querySnapshot = await getDocs(collection(db, `audios`));
+    const querySnapshot = await getDocs(collection(firestore, `audios`));
 
     const f: IAudio[] = [];
     try {

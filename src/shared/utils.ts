@@ -26,6 +26,9 @@ export const utils: IUtils = {
     if (n1 == 1) {
       return text_forms[0];
     }
+    if (n1 == 0) {
+      return text_forms[2];
+    }
     return text_forms[2];
   },
   skloneniye(number, txt) {
@@ -70,6 +73,24 @@ export const utils: IUtils = {
     }
     return result;
   },
+  // bun add paco
+  // // Утилита для сжатия текста (опционально)
+  // compressText: async (text: string): Promise<string> => {
+  //   const encoder = new TextEncoder();
+  //   const data = encoder.encode(text);
+
+  //   // Простое сжатие (в реальном приложении используйте более сложные алгоритмы)
+  //   const compressed = pako.deflate(data);
+  //   return this.arrayBufferToBase64(compressed);
+  // },
+
+  // decompressText: async (compressed: string): Promise<string> => {
+  //   const compressedBuffer = this.base64ToArrayBuffer(compressed);
+  //   const data = pako.inflate(compressedBuffer);
+
+  //   const decoder = new TextDecoder();
+  //   return decoder.decode(data);
+  // }
 };
 
 export default utils;

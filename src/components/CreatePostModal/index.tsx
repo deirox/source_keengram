@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFirebaseStore } from "@/shared/store/useFirebaseStore";
 import { useModalStore } from "@/shared/store/useModalStore";
 import { usePostsStore } from "@/shared/store/usePostsStore";
@@ -10,10 +10,10 @@ import styles from "./CreatePostModal.module.css";
 import GeneratePost from "./GeneratePost";
 import { ReactImageGalleryItem } from "react-image-gallery";
 import {
-  initialIAuthorizedUser,
   initialIFirebaseCreatedAt,
   IPostComment,
-  IPostMedia,
+  IMedia,
+  IPost,
 } from "@/shared/types/api.types";
 import APIFirebase from "@/shared/api/Firebase/index";
 import utils from "@/shared/utils";
@@ -27,14 +27,15 @@ const CreatePostModal = () => {
   );
   const addPost = usePostsStore((state) => state.addPost);
   const authorizedUserData = useUserStore((state) => state.authorizedUserData);
-
+  if (!authorizedUserData) return <>user is undefined</>
   // const uploadedImages = useFirebaseStore((state) => state.uploadedImages);
   const deleteImages = useFirebaseStore((state) => state.deleteImages);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [images, setImages] = useState<ReactImageGalleryItem[]>([]);
   const [postDesc, setPostDesc] = useState("");
-  const [media, setMedia] = useState<IPostMedia[]>([]);
+  const [media, setMedia] = useState<IMedia[]>([]);
+  const [isCreatePostError, setIsCreatePostError] = useState(false);
 
   const stepArray = [
     { title: "Создание публикации", name: "addImages" },
@@ -45,20 +46,21 @@ const CreatePostModal = () => {
 
   const inputOnChange = async (e: React.BaseSyntheticEvent) => {
     const files: File[] = Array.from(e.target.files);
-    const readerArray = [];
 
     const media_response = await APIFirebase.add.Media(
       files.map((file) => {
         const name = utils.makeid(20) + "." + file.name.split(".")[1];
-
         return {
-          path: "images",
+          path: "images/" + name,
+          type: "image",
           file: file,
           file_name: name,
+          file_type: file.type
         };
       }),
     );
-    setMedia(media_response);
+    if (media_response.status !== 'success' || media_response.data === null) return
+    setMedia(media_response.data);
     files.forEach(async (file) => {
       if (!file.type.match("image")) {
         return;
@@ -66,11 +68,6 @@ const CreatePostModal = () => {
       const reader = new FileReader();
       reader.onload = (ev) => {
         if (ev.target) {
-          readerArray.push({
-            original: ev.target.result,
-            thumbnail: ev.target.result,
-            event: ev,
-          });
           setImages((images) => {
             if (ev.target) {
               return [
@@ -97,6 +94,47 @@ const CreatePostModal = () => {
     setImages([]);
     setCurrentStepIndex(0);
   };
+
+
+  useEffect(() => {
+    console.log('currentStepIndex===2', currentStepIndex)
+    console.log('media.length === images.length', media.length === images.length)
+    if (currentStepIndex === 2 && media.length === images.length) {
+      const add = async () => {
+        const comments: IPostComment[] =
+          postDesc.length > 0
+            ? ([
+              {
+                uid: "",
+                post_uid: "",
+                comment_id: 0,
+                author: authorizedUserData.uid,
+                text: postDesc,
+                created_at: initialIFirebaseCreatedAt,
+              },
+            ])
+            : [];
+        const post: Omit<IPost, "uid"> = {
+          post_weight: 0,
+          media,
+          likes: { data: [], length: 0 },
+          created_at: { seconds: 0, nanoseconds: Date.now() },
+          comments: { data: comments, length: comments.length },
+          author: authorizedUserData.uid,
+        };
+        await addPost({ post: post, user: authorizedUserData }).then(newPost => {
+          if (newPost.status == 'error') {
+          }
+        }).catch(() => {
+          setIsCreatePostError(true)
+        }).finally(() => {
+          setCurrentStepIndex(3)
+        })
+      }
+      add()
+    }
+  }, [currentStepIndex, media])
+
   return (
     <ModalBody
       isModalOpen={isCreatePostModalOpen}
@@ -165,34 +203,7 @@ const CreatePostModal = () => {
           {currentStepIndex > 0 && currentStepIndex < 2 && (
             <button
               className={styles.create_post_modal__forward}
-              onClick={async () => {
-                if (authorizedUserData) {
-                  const comments =
-                    postDesc.length > 0
-                      ? ([
-                          {
-                            post_uid: "",
-                            comment_id: 0,
-                            author: authorizedUserData,
-                            text: postDesc,
-                            created_at: initialIFirebaseCreatedAt,
-                            uid: "",
-                          },
-                        ] as IPostComment[])
-                      : [];
-                  const post = {
-                    post_weight: 0,
-                    media,
-                    likes: { data: [], length: 0 },
-                    created_at: { seconds: 0, nanoseconds: Date.now() },
-                    comments: { data: comments, length: comments.length },
-                    author: authorizedUserData.uid,
-                  };
-                  setCurrentStepIndex(2);
-                  addPost({ post: post, user: authorizedUserData });
-                  setCurrentStepIndex(3);
-                }
-              }}
+              onClick={() => setCurrentStepIndex(2)}
             >
               Поделиться
             </button>
@@ -205,21 +216,18 @@ const CreatePostModal = () => {
         <GeneratePost
           active={stepArray[1] === stepArray[currentStepIndex]}
           images={images}
-          authorizedUserData={{
-            ...initialIAuthorizedUser,
-            ...authorizedUserData,
-          }}
+          authorizedUserData={authorizedUserData}
           postDesc={postDesc}
           setPostDesc={setPostDesc}
         />
         {stepArray[2] === stepArray[currentStepIndex] && (
           <div>
-            <LoaderComponent text="" />
+            <LoaderComponent text={media.length !== images.length ? "Идёт размещение изображений..." : "Идёт размещение поста..."} />
           </div>
         )}
         {stepArray[3] === stepArray[currentStepIndex] && (
           <div>
-            <LoaderComponent text="Публикация размещена" />
+            <LoaderComponent text={`${isCreatePostError ? "Произошла ошибка при размещении поста" : "Публикация размещена"}`} />
           </div>
         )}
       </div>

@@ -1,0 +1,45 @@
+.check_confirm_modal {
+  max-width: 400px;
+  height: max-content;
+}
+
+.check_confirm_modal__box {
+  display: flex;
+  flex-direction: column;
+}
+
+.check_confirm_modal__title {
+  width: 100%;
+  text-align: center;
+  padding: 2rem 2rem;
+  font-size: 1.25rem;
+}
+
+.check_confirm_modal__buttons_wrapper {
+  display: flex;
+}
+
+.check_confirm_modal__button {
+  width: 100%;
+  background-color: transparent;
+  color: #fff;
+  border: none;
+  border-top: 1px solid rgb(var(--ig-elevated-separator), 0.1);
+  min-height: 48px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.check_confirm_modal__button+.check_confirm_modal__button {
+  border-left: 1px solid rgb(var(--ig-elevated-separator), 0.1);
+}
+
+.check_confirm_modal__button___add {
+  font-weight: 700;
+  color: rgb(var(--ig-primary-button));
+}
+
+.check_confirm_modal__button___delete {
+  font-weight: 700;
+  color: rgb(var(--ig-error-or-destructive));
+}

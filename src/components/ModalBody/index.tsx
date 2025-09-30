@@ -17,22 +17,21 @@ const ModalBody = ({
   children,
   modalClassname = "",
   overlayClassName = "",
-  onClose = () => {},
+  onClose = () => { },
 }: IModalBody) => {
   ReactModal.setAppElement("#root");
-  if (isModalOpen) {
-    document.body.style.overflow = "hidden";
-  }
   return (
     <ReactModal
       isOpen={isModalOpen}
-      overlayClassName={`${styles.modal_body__overlay} ${
-        overlayClassName && overlayClassName
-      }`}
-      className={`${classname} ${styles.modal_body__content} ${
-        modalClassname && modalClassname
-      }`}
+      onAfterOpen={() => {
+        document.body.style.overflow = "hidden";
+      }}
+      overlayClassName={`${styles.modal_body__overlay} ${overlayClassName && overlayClassName
+        }`}
+      className={`${classname} ${styles.modal_body__content} ${modalClassname && modalClassname
+        }`}
       onRequestClose={() => {
+        document.body.classList.remove("ReactModal__Body--open");
         document.body.style.overflow = "";
         onClose();
       }}
@@ -77,7 +76,8 @@ const ModalBody = ({
       </div>
       {children}
     </ReactModal>
-  );
+  )
+
 };
 
 export default ModalBody;

@@ -1,44 +1,66 @@
-import { StrictMode } from "react";
+import { lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "@/app";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 
-import EditProfilePage from "@/pages/EditProfilePage";
-import LoginPage from "@/pages/LoginPage";
-import ProfilePage from "@/pages/ProfilePage";
-import MusicPage from "@/pages/MusicPage";
-// import ReelsPage from "./Pages/ReelsPage";
-import SignUpPage from "@/pages/SignUpPage";
-import MainPage from "@/pages/MainPage";
-import ErrorPage from "@/pages/ErrorPage";
-
 import dayjs from "dayjs";
-import FCAuthorPage from "./pages/redirects/AuthorPage";
+import relativeTime from 'dayjs/plugin/relativeTime' // ES 2015
+
 import FCAuthorRedirectPage from "./pages/redirects/redirect";
+import LoaderComponent from "./components/LoaderComponent";
+import 'dayjs/locale/ru'
 dayjs.locale("ru");
+dayjs.extend(relativeTime);
+
+const App = lazy(() => import("@/app"));
+const EditProfilePage = lazy(() => import("@/pages/EditProfilePage"));
+const MusicPage = lazy(() => import("@/pages/MusicPage"));
+const FCAuthorPage = lazy(() => import("@/pages/redirects/AuthorPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const LoginPage = lazy(() => import("@/pages/LoginPage"));
+const SignUpPage = lazy(() => import("@/pages/SignUpPage"));
+const MainPage = lazy(() => import("@/pages/MainPage"));
+const ErrorPage = lazy(() => import("@/pages/ErrorPage"));
+// const MessengerPage = lazy(() => import("@/pages/MessengerPage/MessengerPage"));
+
 
 const router = createHashRouter([
   {
     path: "",
-    element: <App />,
-    errorElement: <ErrorPage />,
+    element: <Suspense fallback={<LoaderComponent />}>
+      <App />
+    </Suspense>,
+    errorElement: <ErrorPage text="Что-то пошло не так!" />,
     children: [
       {
-        path: "",
-        element: <MainPage />,
+        path: "/",
+        element: <Suspense fallback={<LoaderComponent />}>
+          <MainPage />
+        </Suspense>,
       },
       {
         path: ":userNickname",
-        element: <ProfilePage />,
+        element: <Suspense fallback={<LoaderComponent />}>
+          <ProfilePage />
+        </Suspense>,
       },
       {
         path: "audios",
-        element: <MusicPage />,
+        element: <Suspense fallback={<LoaderComponent />}>
+          <MusicPage />
+        </Suspense>,
       },
+      // {
+      //   path: "messenger",
+      //   element: <Suspense fallback={<LoaderComponent />}>
+      //     <MessengerPage />
+      //   </Suspense>,
+      // },
       {
         path: "author",
-        element: <FCAuthorPage />,
+        element: <Suspense fallback={<LoaderComponent />}>
+          <FCAuthorPage />
+        </Suspense>,
         children: [
           {
             path: ":data",
@@ -51,21 +73,31 @@ const router = createHashRouter([
         children: [
           {
             path: "login",
-            element: <LoginPage />,
+            element: <Suspense fallback={<LoaderComponent />}>
+              <LoginPage />
+            </Suspense>,
           },
           {
             path: "emailsignup",
-            element: <SignUpPage />,
+            element: <Suspense fallback={<LoaderComponent />}>
+              <SignUpPage />
+            </Suspense>,
           },
           {
             path: "edit",
-            element: <EditProfilePage />,
+            element: <Suspense fallback={<LoaderComponent />}>
+              <EditProfilePage />
+            </Suspense>,
           },
         ],
       },
     ],
   },
-  { path: "*", element: <ErrorPage /> },
+  {
+    path: "*", element: <Suspense fallback={<LoaderComponent />}>
+      <ErrorPage text="Такой страницы не найдено!" />
+    </Suspense>
+  },
 ]);
 
 createRoot(document.getElementById("root")!).render(

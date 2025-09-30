@@ -4,19 +4,27 @@ import {
   getAuth,
   setPersistence,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { BaseSyntheticEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { db } from "@/shared/api/firebase";
+import { firestore } from "@/shared/api/firebase";
 import { useUserStore } from "@/shared/store/useUserStore";
 import styles from "./SignUp.module.css";
-import { IAuthorizedUser, TUserInterfaces } from "@/shared/types/api.types";
+import {
+  IAuthorizedUser,
+  initialIAuthorizedUser,
+  initialIUserMetaInfo,
+} from "@/shared/types/api.types";
+import { Crypto } from "@/shared/utils/cripto";
 
 const SignUp = () => {
-  const [emailValue, setEmailValue] = useState("");
-  const [username, setUsername] = useState("");
-  const [nickname, setNickname] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
+
+  const [newUser, setNewUser] = useState<
+    Pick<IAuthorizedUser, "avatar" | "description" | "name" | "nickname" | "surname" | "public_key" | "email">
+  >({
+    avatar: { url: "" }, description: "", name: "", nickname: "", surname: "", public_key: "", email: ""
+  });
 
   const setAuthorizedUser = useUserStore((state) => state.setAuthorizedUser);
   const authorizedUserData = useUserStore(
@@ -32,7 +40,7 @@ const SignUp = () => {
   }, []);
 
   const isBtnDisabled = () => {
-    if (emailValue.length > 0 && passwordValue.length > 5) {
+    if (newUser.email && newUser.email.length > 0 && passwordValue.length > 5) {
       return false;
     }
     return true;
@@ -47,29 +55,59 @@ const SignUp = () => {
           return createUserWithEmailAndPassword(auth, email, password);
         },
       );
+
+      const { publicKey, privateKey } = await Crypto.generateKeyPair()
+
+      await Crypto.saveEncryptedKeyToDB({ private_key: privateKey })
+
+      const { encryptedKey, salt, iv } = await Crypto.encryptPrivateKeyWithPassword(privateKey, password)
+
       setAuthorizedUser({
+        ...initialIAuthorizedUser,
+        ...newUser,
         uid: user.uid,
         accessToken: user.refreshToken,
         email: user.email,
-      } as TUserInterfaces);
-      await setDoc(doc(db, "users", user.uid), {
-        username: username,
-        nickname: nickname,
-        avatar: { url: "img/EmptyAvatar.jpg" },
-        description: "",
-        url: "",
-        subscribers: [],
-        subscribed: [],
+        public_key: publicKey,
+      } as IAuthorizedUser);
+      await setDoc(doc(firestore, "users", user.uid), {
+        ...newUser,
+        created_at: serverTimestamp()
+      });
+      await setDoc(doc(firestore, "users", user.uid, 'meta', 'info'), initialIUserMetaInfo);
+      await setDoc(doc(firestore, "users", user.uid, 'meta', 'encryted_keys'), {
+        private_key: encryptedKey,
+        salt,
+        iv
       });
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   const onFormSubmit = (e: BaseSyntheticEvent) => {
     e.preventDefault();
-    handleSignUp(emailValue, passwordValue);
+
+    const characters_arr = [
+      " ",
+      "/",
+      "audios",
+      "author",
+      "accounts",
+      "login",
+      "emailsignup",
+      "edit",
+    ];
+
+    if (
+      !characters_arr.some((item) =>
+        newUser.nickname.toLowerCase().includes(item.toLowerCase()),
+      ) &&
+      newUser.email
+    ) {
+      handleSignUp(newUser.email, passwordValue);
+    }
   };
 
   return (
@@ -83,36 +121,40 @@ const SignUp = () => {
             className={styles.login_page__form}
             onSubmit={(e) => onFormSubmit(e)}
           >
-            {/* <label className="_aa48">
-              <span className="_aa4a">Пароль</span>
-              <input
-                className={styles.login_page__form__input}
-                placeholder="Имя пользователя"
-                type="text"
-                value={loginValue}
-                onChange={(e) => setLoginValue(e.target.value)}
-                aria-required={true}
-                autoCapitalize="off"
-                autoCorrect="off"
-              />
-            </label> */}
             <input
               className={styles.login_page__form__input}
               placeholder="Эл.адрес"
               type="email"
-              value={emailValue}
-              onChange={(e) => setEmailValue(e.target.value)}
+              value={newUser.email}
+              onChange={(e) =>
+                setNewUser((user) => ({ ...user, email: e.target.value }))
+              }
               aria-required={true}
               autoCapitalize="off"
               autoCorrect="off"
             />
             <input
               className={styles.login_page__form__input}
-              placeholder="Имя и фамилия"
+              placeholder="Имя"
+              type="text"
+              minLength={1}
+              value={newUser.name}
+              onChange={(e) =>
+                setNewUser((user) => ({ ...user, name: e.target.value }))
+              }
+              aria-required={true}
+              autoCapitalize="off"
+              autoCorrect="off"
+            />
+            <input
+              className={styles.login_page__form__input}
+              placeholder="Фамилия"
               type="text"
               minLength={5}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={newUser.surname}
+              onChange={(e) =>
+                setNewUser((user) => ({ ...user, surname: e.target.value }))
+              }
               aria-required={true}
               autoCapitalize="off"
               autoCorrect="off"
@@ -121,8 +163,10 @@ const SignUp = () => {
               className={styles.login_page__form__input}
               placeholder="Имя пользователя"
               type="text"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              value={newUser.nickname}
+              onChange={(e) =>
+                setNewUser((user) => ({ ...user, nickname: e.target.value.trim() }))
+              }
               aria-required={true}
               autoCapitalize="off"
               autoCorrect="off"

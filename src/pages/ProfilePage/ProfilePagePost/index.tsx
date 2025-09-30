@@ -1,41 +1,38 @@
-import { FC, lazy, Suspense, useState } from "react";
+import { FC, lazy, memo, Suspense, useState } from "react";
 import { BsSuitHeartFill } from "react-icons/bs";
 import { FaComment } from "react-icons/fa";
 import styles from "./ProfilePagePost.module.css";
 import { IPost } from "@/shared/types/api.types";
 
-const PostCardModal = lazy(() => import("@/components/PostCard/PostCardModal"));
+const PostCardModal = lazy(() => import("@/components/Post/PostModal"));
 
 interface IFCProfilePagePost {
   post: IPost;
 }
 
-const ProfilePagePost: FC<IFCProfilePagePost> = ({ post }) => {
+const ProfilePagePost: FC<IFCProfilePagePost> = memo(({ post }) => {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
-  const onOpen = () => {
+
+  const onOpen = async () => {
     setIsPostModalOpen(true);
   };
   const onClose = () => {
     setIsPostModalOpen(false);
   };
+
+  const [media_url] = useState(post.media[0].url[post.media[0].url.length - 1]);
   return (
     <>
-      <Suspense fallback={<>loading</>}>
+      <Suspense fallback={<></>}>
         <PostCardModal
           isOpen={isPostModalOpen}
           onClose={onClose}
-          author={post.author}
-          comments={post.comments}
-          created_at={post.created_at}
-          media={post.media}
-          likes={post.likes}
-          uid={post.uid}
-          post_weight={0}
+          post={post}
         />
       </Suspense>
 
       <div className={styles.profile_page__post} onClick={onOpen}>
-        <img src={post.media[0].url} alt={post.media[0].url} />
+        <img src={media_url} alt={media_url} />
         <div className={styles.profile_page__post_hover}>
           <div className={styles.profile_page__post_hover__container}>
             {post.likes.length > 0 && (
@@ -59,6 +56,6 @@ const ProfilePagePost: FC<IFCProfilePagePost> = ({ post }) => {
       </div>
     </>
   );
-};
+})
 
 export default ProfilePagePost;

@@ -2,13 +2,15 @@ import {
   IPost,
   IPostComment,
   IPostLike,
-  IPostMedia,
+  IMedia,
+  INewMedia,
+  IAPIMethodResponse,
 } from "@/shared/types/api.types";
 
 export interface IFirebaseAddPostArgs {
-  post: Omit<IPost, "uid" | "created_at">;
+  post: Omit<IPost, "uid">;
 }
-export type TFirebaseAddPost = (args: IFirebaseAddPostArgs) => Promise<IPost>;
+export type TFirebaseAddPost = (args: IFirebaseAddPostArgs) => Promise<IAPIMethodResponse<IPost>>;
 
 export interface IFirebaseAddLikeArgs {
   post_uid: string;
@@ -25,12 +27,8 @@ export type TFirebaseAddComments = (
   args: IFirebaseAddCommentsArgs,
 ) => Promise<IPostComment>;
 
-export type IFirebaseAddMediaArgs = {
-  path: string;
-  file: File;
-  file_name: string;
-}[];
+export type IFirebaseAddMediaArgs = INewMedia[];
 
 export type TFirebaseAddMedia = (
   args: IFirebaseAddMediaArgs,
-) => Promise<IPostMedia[]>;
+) => Promise<IAPIMethodResponse<IMedia[]>>;

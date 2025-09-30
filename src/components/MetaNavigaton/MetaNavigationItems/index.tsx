@@ -12,15 +12,15 @@ import MetaNavigationItem from "../MetaNavigationItem";
 import styles from "./MetaNavigationItems.module.css";
 import { useUserStore } from "@/shared/store/useUserStore";
 import { useModalStore } from "@/shared/store/useModalStore";
-import CreatePostModal from "../../CreatePostModal";
+import CreatePostModal from "@/components/CreatePostModal";
 
 const MetaNavigationItems = () => {
-  const user = useUserStore((state) => state.authorizedUserData);
   const navigate = useNavigate();
   const [itemActive, setItemActive] = useState(1);
-  const imgProps = user
+  const user = useUserStore((state) => state.authorizedUserData);
+  const imgProps = user && user.avatar
     ? { src: user.avatar.url, alt: `${user.nickname} avatar` }
-    : { src: "", alt: "" };
+    : { src: "img/EmptyAvatar.jpg", alt: "" };
 
   const isCreatePostModalOpen = useModalStore(
     (state) => state.isCreatePostModalOpen,
@@ -37,13 +37,19 @@ const MetaNavigationItems = () => {
 
   useEffect(() => {
     switch (location.pathname) {
-      case `/${params.userNickname}`:
+      case `/${user ? user.nickname : ""}`:
         setItemActive(8);
+        break;
+      case `/audios`:
+        setItemActive(2);
+        break;
+      case `/messenger`:
+        setItemActive(3);
         break;
       default:
         setItemActive(1);
     }
-  }, []);
+  }, [location.pathname, params.userNickname]);
 
   const metaNavItems = [
     {
@@ -73,6 +79,21 @@ const MetaNavigationItems = () => {
         },
       },
     },
+    // {
+    //   itemId: 3,
+    //   icon: <BsChatDots />,
+    //   activeIcon: <BsChatDotsFill />,
+    //   btnProps: {
+    //     children: "Сообщения",
+    //   },
+    //   itemProps: {
+    //     onClick: () => {
+    //       navigate("/messenger");
+    //       setItemActive(3);
+    //     },
+    //   },
+    //   badge: totalUnreadCount > 0 ? totalUnreadCount : undefined,
+    // },
     {
       itemId: 7,
       icon: <MdOutlineAddBox />,

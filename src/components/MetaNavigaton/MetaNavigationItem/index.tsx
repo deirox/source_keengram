@@ -1,6 +1,6 @@
 import { FC, ReactElement } from "react";
-import styles from "./MetaNavigationItem.module.css";
 import cn from "classnames";
+import styles from "./MetaNavigationItem.module.css";
 
 interface IFCMetaNavigationItem {
   icon?: ReactElement;
@@ -12,6 +12,7 @@ interface IFCMetaNavigationItem {
   };
   btnProps: { children: string };
   imgProps?: { src: string; alt: string };
+  badge?: number; // Количество непрочитанных сообщений
 }
 
 const MetaNavigationItem: FC<IFCMetaNavigationItem> = ({
@@ -22,6 +23,7 @@ const MetaNavigationItem: FC<IFCMetaNavigationItem> = ({
   itemProps,
   btnProps,
   imgProps = { src: "", alt: "" },
+  badge,
 }) => {
   return (
     <div
@@ -51,6 +53,14 @@ const MetaNavigationItem: FC<IFCMetaNavigationItem> = ({
           <img {...imgProps} />
         </div>
       )}
+      
+      {/* Бейдж для непрочитанных сообщений */}
+      {badge && badge > 0 && (
+        <div className={styles.meta_navigation_item__badge}>
+          {badge > 99 ? '99+' : badge}
+        </div>
+      )}
+      
       <button className={styles.meta_navigation_item__btn} {...btnProps} />
     </div>
   );

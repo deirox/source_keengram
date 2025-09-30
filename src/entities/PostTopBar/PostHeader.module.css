@@ -1,0 +1,69 @@
+.post_card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 .625rem;
+}
+
+.post_card__info {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0.25rem;
+}
+
+.post_card__author_bio__top {
+    display: flex;
+}
+
+.post_card__created_date {
+    color: rgb(var(--ig-secondary-text));
+}
+
+.post_card__author_nickname {
+    margin-left: 10px;
+    color: var(--ig-secondary-button);
+    cursor: pointer;
+}
+
+.post_card__author_nickname:hover,
+.post_card__author_nickname:visited:hover {
+    opacity: 0.5;
+}
+
+.post_card__actions {
+    position: relative;
+}
+
+.post_card__action_button {
+    background-color: transparent;
+    color: rgb(var(--ig-secondary-button));
+    border: none;
+    cursor: pointer;
+    font-size: 1.4rem;
+    opacity: .5;
+}
+
+.post_card__action_button:hover {
+    opacity: 1;
+}
+
+.post_card__actions_list {
+    position: absolute;
+    top: 1rem;
+    right: 2.5rem;
+    min-width: max-content;
+    padding: 1rem;
+    background-color: #000200;
+    border: 1px solid rgb(var(--ig-secondary-button), .25);
+    border-radius: 2rem;
+    z-index: 1;
+}
+
+.post_card__action {
+    cursor: pointer;
+}
+
+.post_card__action:hover,
+.post_card__action:visited:hover {
+    opacity: 0.5;
+}
