@@ -30,7 +30,7 @@ const ModalBody = ({
         }`}
       className={`${classname} ${styles.modal_body__content} ${modalClassname && modalClassname
         }`}
-      onRequestClose={() => {
+      onAfterClose={() => {
         document.body.classList.remove("ReactModal__Body--open");
         document.body.style.overflow = "";
         onClose();
